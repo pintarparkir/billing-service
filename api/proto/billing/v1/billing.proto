@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package parkirpintar.billing.v1;
+
+option go_package = "github.com/farid/billing-service/api/proto/billing/v1;billingv1";
+
+import "google/protobuf/timestamp.proto";
+
+service BillingService {
+  rpc OpenInvoice  (OpenInvoiceRequest)  returns (Invoice);
+  rpc CloseInvoice (CloseInvoiceRequest) returns (Invoice);
+  rpc GetInvoice   (GetInvoiceRequest)   returns (Invoice);
+}
+
+enum InvoiceStatus {
+  INVOICE_STATUS_UNSPECIFIED = 0;
+  OPEN = 1;
+  CLOSED = 2;
+  PAID = 3;
+  VOID = 4;
+}
+
+enum LineKind {
+  LINE_KIND_UNSPECIFIED = 0;
+  BOOKING = 1;
+  HOURLY = 2;
+  OVERNIGHT = 3;
+  CANCELLATION = 4;
+  NOSHOW = 5;
+}
+
+message LineItem {
+  string id = 1;
+  LineKind kind = 2;
+  int64 amount_idr = 3;
+}
+
+message Invoice {
+  string id = 1;
+  string reservation_id = 2;
+  InvoiceStatus status = 3;
+  int64 total_idr = 4;
+  repeated LineItem lines = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp closed_at = 7;
+  google.protobuf.Timestamp paid_at = 8;
+}
+
+message OpenInvoiceRequest  { string reservation_id = 1; string driver_id = 2; }
+message CloseInvoiceRequest {
+  string invoice_id = 1;
+  google.protobuf.Timestamp checked_in_at = 2;
+  google.protobuf.Timestamp checked_out_at = 3;
+}
+message GetInvoiceRequest   { string id = 1; }

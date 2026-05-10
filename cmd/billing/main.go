@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/farid/billing-service/internal/billing/consumer"
+	billgrpc "github.com/farid/billing-service/internal/billing/handler/grpc"
 	billrepo "github.com/farid/billing-service/internal/billing/repository/postgres"
 	billuc "github.com/farid/billing-service/internal/billing/usecase"
 	"github.com/farid/billing-service/internal/billing/worker"
@@ -31,6 +32,8 @@ import (
 	"github.com/farid/billing-service/internal/billing/model"
 	"github.com/farid/billing-service/pkg/configs"
 	pgdb "github.com/farid/billing-service/pkg/db/postgres"
+	"github.com/farid/billing-service/pkg/grpcserver"
+	"github.com/farid/billing-service/pkg/idempotency"
 	"github.com/farid/billing-service/pkg/logger"
 	pkgOtel "github.com/farid/billing-service/pkg/otel"
 	"github.com/farid/billing-service/pkg/pricing"
@@ -90,6 +93,25 @@ func main() {
 	obRepo := billrepo.NewOutboxRepository(db)
 	uc := billuc.NewBillingUsecase(repo, engine, pricingCfg)
 
+	// ── gRPC server (s2s callers — reservation-service.OpenInvoice/CloseInvoice) ─
+	// CloseInvoice is naturally idempotent at the row level (status != OPEN
+	// short-circuits) and reservation-service doesn't have a stable client key
+	// to pass on the close path, so we don't enforce header-level idempotency
+	// here. OpenInvoice still requires Idempotency-Key from the caller.
+	grpcSrv, err := grpcserver.NewGrpcServer(cfg.GrpcPort, grpcserver.Options{
+		IdempotencyStore:  idempotency.NewPostgresStore(db),
+		IdempotentMethods: []string{model.SCOPE_OPEN_INVOICE},
+	})
+	if err != nil {
+		logger.Fatal(ctx, "grpc server init failed", map[string]interface{}{logger.ErrorKey: err.Error()})
+	}
+	billgrpc.Register(grpcSrv.Server, uc)
+	go func() {
+		if err := grpcSrv.Start(); err != nil {
+			logger.Fatal(ctx, "grpc serve failed", map[string]interface{}{logger.ErrorKey: err.Error()})
+		}
+	}()
+
 	// ── Background workers ───────────────────────────────────────────────────
 	go worker.NewOutboxPublisher(obRepo, pub).Run(ctx)
 
@@ -108,5 +130,6 @@ func main() {
 	// ── Graceful shutdown ────────────────────────────────────────────────────
 	<-ctx.Done()
 	logger.Info(context.Background(), "shutdown signal received", nil)
+	grpcSrv.Shutdown()
 	_ = logger.Sync()
 }

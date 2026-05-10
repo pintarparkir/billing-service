@@ -1,6 +1,6 @@
 # Feature 01 — OpenInvoice
 
-**Status:** ⏳ in progress (gRPC handler pending buf generate)
+**Status:** ✅ shipped
 **Owner:** billing-service
 
 ## Scope

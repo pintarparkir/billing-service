@@ -1,6 +1,6 @@
 # Feature 02 — CloseInvoice
 
-**Status:** ⏳ in progress (gRPC handler pending buf generate)
+**Status:** ✅ shipped
 **Owner:** billing-service
 
 ## Scope

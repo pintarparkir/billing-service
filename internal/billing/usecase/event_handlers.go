@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/farid/billing-service/internal/billing/model"
@@ -37,12 +38,15 @@ func (u *billingUsecase) ApplyCancelFee(ctx context.Context, reservationID strin
 		if l.Kind != pricing.LineCancellation || l.AmountIDR == 0 {
 			continue
 		}
-		payload, _ := json.Marshal(map[string]any{
+		payload, merr := json.Marshal(map[string]any{
 			"invoice_id":     inv.ID,
 			"reservation_id": reservationID,
 			"kind":           "CANCELLATION",
 			"amount_idr":     l.AmountIDR,
 		})
+		if merr != nil {
+			return fmt.Errorf("billing: marshal cancel payload: %w", merr)
+		}
 		if _, err := u.repo.AppendLine(ctx, inv.ID, model.LineItem{
 			Kind: model.LineCancellation, AmountIDR: l.AmountIDR,
 			Metadata: map[string]any{"reason": "post-grace cancel"},
@@ -66,12 +70,15 @@ func (u *billingUsecase) ApplyNoShowFee(ctx context.Context, reservationID strin
 		return nil
 	}
 
-	payload, _ := json.Marshal(map[string]any{
+	payload, err := json.Marshal(map[string]any{
 		"invoice_id":     inv.ID,
 		"reservation_id": reservationID,
 		"kind":           "NOSHOW",
 		"amount_idr":     u.cfg.NoShowFeeIDR,
 	})
+	if err != nil {
+		return fmt.Errorf("billing: marshal noshow payload: %w", err)
+	}
 	_, err = u.repo.AppendLine(ctx, inv.ID, model.LineItem{
 		Kind: model.LineNoShow, AmountIDR: u.cfg.NoShowFeeIDR,
 		Metadata: map[string]any{"reason": "no-show"},
@@ -79,12 +86,5 @@ func (u *billingUsecase) ApplyNoShowFee(ctx context.Context, reservationID strin
 	return err
 }
 
-var jakarta = mustLoc("Asia/Jakarta")
-
-func mustLoc(name string) *time.Location {
-	loc, err := time.LoadLocation(name)
-	if err != nil {
-		panic(err)
-	}
-	return loc
-}
+// jakarta is UTC+7. time.FixedZone never fails, avoiding a panic at init time.
+var jakarta = time.FixedZone("Asia/Jakarta", 7*60*60)

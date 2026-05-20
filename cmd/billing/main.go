@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -49,7 +50,11 @@ func main() {
 	defer stop()
 
 	otel := pkgOtel.NewOpenTelemetry(cfg.OTLPEndpoint, "billing", cfg.AppEnv)
-	defer func() { _ = otel.EndAPM() }()
+	defer func() {
+		if err := otel.EndAPM(); err != nil {
+			fmt.Fprintln(os.Stderr, "otel shutdown:", err)
+		}
+	}()
 
 	// ── Infra ────────────────────────────────────────────────────────────────
 	db, err := pgdb.NewPostgresDB(pgdb.PostgresDsn{
@@ -131,5 +136,7 @@ func main() {
 	<-ctx.Done()
 	logger.Info(context.Background(), "shutdown signal received", nil)
 	grpcSrv.Shutdown()
-	_ = logger.Sync()
+	if err := logger.Sync(); err != nil {
+		fmt.Fprintln(os.Stderr, "logger sync:", err)
+	}
 }

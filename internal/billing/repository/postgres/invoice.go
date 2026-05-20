@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -180,16 +181,10 @@ func (r *invoiceRepo) Close(ctx context.Context, invoiceID string, lines []model
 
 	newLineTotal := int64(0)
 	for _, l := range lines {
-		// Skip the synthetic booking-fee line if it would duplicate the row already inserted on Open.
 		if l.Kind == model.LineBooking {
-			continue
+			continue // skip: booking-fee row already inserted on Open
 		}
-		md := l.Metadata
-		if md == nil {
-			md = map[string]any{}
-		}
-		mdB, _ := json.Marshal(md)
-		if _, err := tx.ExecContext(ctx, insertLineSQL, invoiceID, l.Kind, l.AmountIDR, mdB); err != nil {
+		if err := insertLine(ctx, tx, invoiceID, l); err != nil {
 			return nil, err
 		}
 		newLineTotal += l.AmountIDR
@@ -215,12 +210,7 @@ func (r *invoiceRepo) AppendLine(ctx context.Context, invoiceID string, line mod
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	md := line.Metadata
-	if md == nil {
-		md = map[string]any{}
-	}
-	mdB, _ := json.Marshal(md)
-	if _, err := tx.ExecContext(ctx, insertLineSQL, invoiceID, line.Kind, line.AmountIDR, mdB); err != nil {
+	if err := insertLine(ctx, tx, invoiceID, line); err != nil {
 		return nil, err
 	}
 	if _, err := tx.ExecContext(ctx,
@@ -238,6 +228,20 @@ func (r *invoiceRepo) AppendLine(ctx context.Context, invoiceID string, line mod
 		return nil, err
 	}
 	return r.GetByID(ctx, invoiceID)
+}
+
+// insertLine marshals the line's metadata and inserts one invoice_line row.
+func insertLine(ctx context.Context, tx *sqlx.Tx, invoiceID string, l model.LineItem) error {
+	md := l.Metadata
+	if md == nil {
+		md = map[string]any{}
+	}
+	mdB, err := json.Marshal(md)
+	if err != nil {
+		return fmt.Errorf("billing: marshal line metadata: %w", err)
+	}
+	_, err = tx.ExecContext(ctx, insertLineSQL, invoiceID, l.Kind, l.AmountIDR, mdB)
+	return err
 }
 
 // ── row types ────────────────────────────────────────────────────────────────
@@ -294,8 +298,9 @@ func (l lineRow) toModel() model.LineItem {
 	}
 	if len(l.Metadata) > 0 {
 		var m map[string]any
-		_ = json.Unmarshal(l.Metadata, &m)
-		out.Metadata = m
+		if err := json.Unmarshal(l.Metadata, &m); err == nil {
+			out.Metadata = m
+		}
 	}
 	if l.CreatedAt.Valid {
 		out.CreatedAt = l.CreatedAt.Time

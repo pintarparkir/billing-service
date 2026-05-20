@@ -19,6 +19,11 @@ import (
 
 // Reservation event payloads (subset we care about). The producer
 // (reservation-service) emits these as JSON via outbox.
+type createdEvt struct {
+	ReservationID string `json:"reservation_id"`
+	DriverID      string `json:"driver_id"`
+}
+
 type cancelledEvt struct {
 	ReservationID string    `json:"reservation_id"`
 	Reason        string    `json:"reason"`
@@ -47,6 +52,25 @@ func NewReservation(uc usecase.BillingUsecase) *Reservation { return &Reservatio
 // Returns non-nil to NACK + requeue; nil to ACK.
 func (c *Reservation) Handle(ctx context.Context, routingKey string, body []byte) error {
 	switch routingKey {
+	case model.EvtReservationCreated:
+		var ev createdEvt
+		if err := json.Unmarshal(body, &ev); err != nil {
+			logger.Error(ctx, "consumer: bad payload", map[string]interface{}{
+				"routing_key": routingKey, logger.ErrorKey: err.Error(),
+			})
+			return nil // bad payload → drop
+		}
+		if ev.ReservationID == "" {
+			logger.Error(ctx, "consumer: missing reservation_id", map[string]interface{}{
+				"routing_key": routingKey,
+			})
+			return nil
+		}
+		// Use reservation_id as the idempotency key: it's stable, unique, and
+		// guarantees one invoice per reservation even on event replay.
+		_, err := c.uc.OpenInvoice(ctx, ev.ReservationID, ev.DriverID, ev.ReservationID)
+		return err
+
 	case model.EvtReservationCancelled:
 		var ev cancelledEvt
 		if err := json.Unmarshal(body, &ev); err != nil {

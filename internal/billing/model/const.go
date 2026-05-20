@@ -15,6 +15,7 @@ const (
 
 // Routing keys we subscribe to (from reservation-service).
 const (
+	EvtReservationCreated    = "reservation.created.v1"
 	EvtReservationCheckedOut = "reservation.checked_out.v1"
 	EvtReservationCancelled  = "reservation.cancelled.v1"
 	EvtReservationExpired    = "reservation.expired.v1"

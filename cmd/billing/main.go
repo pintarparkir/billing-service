@@ -74,6 +74,7 @@ func main() {
 
 	sub, err := rabbit.NewSubscriber(cfg.RabbitURL, cfg.RabbitExchange, cfg.RabbitQueue,
 		[]string{
+			model.EvtReservationCreated,
 			model.EvtReservationCancelled,
 			model.EvtReservationExpired,
 			model.EvtReservationCheckedOut,

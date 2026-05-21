@@ -1,9 +1,10 @@
 // Package consumer wires RabbitMQ deliveries into the billing usecase.
 //
 // Subscribed routing keys:
-//   reservation.cancelled.v1   → ApplyCancelFee
-//   reservation.expired.v1     → ApplyNoShowFee
-//   reservation.checked_out.v1 → CloseInvoice (full pricing)
+//
+//	reservation.cancelled.v1   → ApplyCancelFee
+//	reservation.expired.v1     → ApplyNoShowFee
+//	reservation.checked_out.v1 → CloseInvoice (full pricing)
 package consumer
 
 import (

@@ -17,12 +17,12 @@ type Engine struct {
 
 // NewDefaultEngine wires the canonical rule set in the order they must execute.
 //
-//   1. Cancellation — if cancelled, all other rules are short-circuited to
-//      0/booking-or-cancel-fee depending on grace window.
-//   2. NoShow — if the worker flagged the row, emit a flat fee, no hourly.
-//   3. Booking — always charge unless cancelled within grace.
-//   4. Overnight — if session crosses 00:00 WIB, flat replaces hourly.
-//   5. Hourly — ceil(duration/hour) × rate, skipped iff Overnight emitted.
+//  1. Cancellation — if cancelled, all other rules are short-circuited to
+//     0/booking-or-cancel-fee depending on grace window.
+//  2. NoShow — if the worker flagged the row, emit a flat fee, no hourly.
+//  3. Booking — always charge unless cancelled within grace.
+//  4. Overnight — if session crosses 00:00 WIB, flat replaces hourly.
+//  5. Hourly — ceil(duration/hour) × rate, skipped iff Overnight emitted.
 //
 // All rules are pure: they never call out, never read clock state, never log.
 func NewDefaultEngine(cfg Config) *Engine {

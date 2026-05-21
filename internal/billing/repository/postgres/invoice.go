@@ -247,15 +247,15 @@ func insertLine(ctx context.Context, tx *sqlx.Tx, invoiceID string, l model.Line
 // ── row types ────────────────────────────────────────────────────────────────
 
 type invoiceRow struct {
-	ID             string       `db:"id"`
-	ReservationID  string       `db:"reservation_id"`
-	DriverID       string       `db:"driver_id"`
-	Status         string       `db:"status"`
-	TotalIDR       int64        `db:"total_idr"`
-	IdempotencyKey string       `db:"idempotency_key"`
-	CreatedAt      pq.NullTime  `db:"created_at"`
-	ClosedAt       pq.NullTime  `db:"closed_at"`
-	PaidAt         pq.NullTime  `db:"paid_at"`
+	ID             string      `db:"id"`
+	ReservationID  string      `db:"reservation_id"`
+	DriverID       string      `db:"driver_id"`
+	Status         string      `db:"status"`
+	TotalIDR       int64       `db:"total_idr"`
+	IdempotencyKey string      `db:"idempotency_key"`
+	CreatedAt      pq.NullTime `db:"created_at"`
+	ClosedAt       pq.NullTime `db:"closed_at"`
+	PaidAt         pq.NullTime `db:"paid_at"`
 }
 
 func (r invoiceRow) toModel() *model.Invoice {

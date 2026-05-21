@@ -52,8 +52,8 @@ func (w *OutboxPublisher) tick(ctx context.Context) {
 		if err := w.publisher.Publish(ctx, r.EventType, r.Payload); err != nil {
 			logger.Error(ctx, "billing outbox: publish failed",
 				map[string]interface{}{
-					"id":         r.ID,
-					"event_type": r.EventType,
+					"id":            r.ID,
+					"event_type":    r.EventType,
 					logger.ErrorKey: err.Error(),
 				})
 			break

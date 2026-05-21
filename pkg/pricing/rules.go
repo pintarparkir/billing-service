@@ -8,6 +8,7 @@ import (
 // cancellationRule short-circuits the chain on cancel:
 //   - cancel inside grace window  → no lines (free)
 //   - cancel after grace          → CancelFeeIDR only, no booking, no hourly
+//
 // We mark prior with both lines so later rules (Booking, Hourly, Overnight) skip.
 type cancellationRule struct{}
 

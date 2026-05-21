@@ -18,10 +18,10 @@ func (u *billingUsecase) OpenInvoice(ctx context.Context, reservationID, driverI
 	}
 
 	payload, _ := json.Marshal(map[string]any{
-		"reservation_id":   reservationID,
-		"driver_id":        driverID,
-		"booking_fee_idr":  u.cfg.BookingFeeIDR,
-		"idempotency_key":  idem,
+		"reservation_id":  reservationID,
+		"driver_id":       driverID,
+		"booking_fee_idr": u.cfg.BookingFeeIDR,
+		"idempotency_key": idem,
 	})
 	return u.repo.Open(ctx, reservationID, driverID, idem, u.cfg.BookingFeeIDR, payload)
 }

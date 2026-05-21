@@ -28,4 +28,3 @@ func TestDialWithValidAddress(t *testing.T) {
 	require.NotNil(t, conn)
 	defer func() { _ = conn.Close() }()
 }
-

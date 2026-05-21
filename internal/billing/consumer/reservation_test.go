@@ -79,3 +79,58 @@ func TestHandle_Created_IdempotentReplay(t *testing.T) {
 
 	uc.AssertExpectations(t)
 }
+
+// ── reservation.cancelled.v1 routing ─────────────────────────────────────
+
+func TestHandle_Cancelled_AppliesCancelFee(t *testing.T) {
+	ctx := context.Background()
+	uc := new(mockuc.MockBillingUsecase)
+	uc.On("ApplyCancelFee", ctx, "res-cancel", mock.Anything, mock.Anything).
+		Return(nil)
+
+	c := consumer.NewReservation(uc)
+	err := c.Handle(ctx, model.EvtReservationCancelled, []byte(`{
+		"reservation_id":"res-cancel",
+		"reason":"driver_request",
+		"confirmed_at":"2026-05-21T10:00:00Z",
+		"cancelled_at":"2026-05-21T10:05:00Z"
+	}`))
+
+	require.NoError(t, err)
+	uc.AssertExpectations(t)
+}
+
+// ── reservation.expired.v1 routing ──────────────────────────────────────
+
+func TestHandle_Expired_AppliesNoShowFee(t *testing.T) {
+	ctx := context.Background()
+	uc := new(mockuc.MockBillingUsecase)
+	uc.On("ApplyNoShowFee", ctx, "res-expired").Return(nil)
+
+	c := consumer.NewReservation(uc)
+	err := c.Handle(ctx, model.EvtReservationExpired, []byte(`{"reservation_id":"res-expired"}`))
+
+	require.NoError(t, err)
+	uc.AssertExpectations(t)
+}
+
+// ── reservation.checked_out.v1 routing ──────────────────────────────────
+
+func TestHandle_CheckedOut_ClosesInvoice(t *testing.T) {
+	ctx := context.Background()
+	uc := new(mockuc.MockBillingUsecase)
+	inv := &model.Invoice{ID: "inv-co"}
+	uc.On("GetInvoiceByReservation", ctx, "res-co").Return(inv, nil)
+	uc.On("CloseInvoice", ctx, "inv-co", mock.Anything).Return(inv, nil)
+
+	c := consumer.NewReservation(uc)
+	err := c.Handle(ctx, model.EvtReservationCheckedOut, []byte(`{
+		"reservation_id":"res-co",
+		"confirmed_at":"2026-05-21T10:00:00Z",
+		"checked_in_at":"2026-05-21T10:05:00Z",
+		"checked_out_at":"2026-05-21T11:05:00Z"
+	}`))
+
+	require.NoError(t, err)
+	uc.AssertExpectations(t)
+}

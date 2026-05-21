@@ -121,3 +121,69 @@ func TestCloseInvoice_PostGraceCancelLine_NotFiltered(t *testing.T) {
 	assert.Equal(t, inv.ID, got.ID)
 	repo.AssertExpectations(t)
 }
+
+func TestCloseInvoice_MetadataNoteMapped(t *testing.T) {
+	ctx := context.Background()
+	repo := new(mockrepo.MockInvoiceRepository)
+	inv := mkInvoice("inv-close-4", "res-4", model.InvoiceClosed)
+
+	now := time.Date(2026, 5, 20, 10, 0, 0, 0, jakarta)
+	session := pricing.Session{
+		ConfirmedAt:  now,
+		CheckedInAt:  now,
+		CheckedOutAt: now.Add(time.Hour),
+		VehicleType:  pricing.VehicleCar,
+		Timezone:     jakarta,
+	}
+
+	repo.On("GetByID", ctx, "inv-close-4").Return(inv, nil)
+	repo.On("Close", ctx, "inv-close-4",
+		mock.MatchedBy(func(lines []model.LineItem) bool {
+			if len(lines) == 0 {
+				return false
+			}
+			for _, l := range lines {
+				if l.Metadata == nil {
+					return false
+				}
+				if _, ok := l.Metadata["note"]; !ok {
+					return false
+				}
+			}
+			return true
+		}),
+		mock.Anything,
+	).Return(inv, nil)
+
+	uc := newUC(repo)
+	got, err := uc.CloseInvoice(ctx, "inv-close-4", session)
+
+	require.NoError(t, err)
+	assert.Equal(t, inv.ID, got.ID)
+	repo.AssertExpectations(t)
+}
+
+func TestCloseInvoice_GetByIDErrorStillCloses(t *testing.T) {
+	ctx := context.Background()
+	repo := new(mockrepo.MockInvoiceRepository)
+	inv := mkInvoice("inv-close-5", "res-5", model.InvoiceClosed)
+
+	now := time.Date(2026, 5, 20, 10, 0, 0, 0, jakarta)
+	session := pricing.Session{
+		ConfirmedAt:  now,
+		CheckedInAt:  now,
+		CheckedOutAt: now.Add(time.Hour),
+		VehicleType:  pricing.VehicleCar,
+		Timezone:     jakarta,
+	}
+
+	repo.On("GetByID", ctx, "inv-close-5").Return(nil, assert.AnError)
+	repo.On("Close", ctx, "inv-close-5", mock.Anything, mock.Anything).Return(inv, nil)
+
+	uc := newUC(repo)
+	got, err := uc.CloseInvoice(ctx, "inv-close-5", session)
+
+	require.NoError(t, err)
+	assert.Equal(t, inv.ID, got.ID)
+	repo.AssertExpectations(t)
+}

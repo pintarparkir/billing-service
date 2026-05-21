@@ -3,10 +3,12 @@ package usecase
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/farid/billing-service/internal/billing/model"
 	"github.com/farid/billing-service/internal/billing/repository"
+	"github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/pkg/pricing"
 )
 
@@ -29,8 +31,25 @@ type billingUsecase struct {
 	repo   repository.InvoiceRepository
 	engine *pricing.Engine
 	cfg    pricing.Config
+	users  grpcclient.UserClient
 }
 
 func NewBillingUsecase(repo repository.InvoiceRepository, engine *pricing.Engine, cfg pricing.Config) BillingUsecase {
 	return &billingUsecase{repo: repo, engine: engine, cfg: cfg}
+}
+
+func (u *billingUsecase) WithUserClient(users grpcclient.UserClient) *billingUsecase {
+	u.users = users
+	return u
+}
+
+func (u *billingUsecase) lookupMSISDN(ctx context.Context, driverID string) string {
+	if u.users == nil || driverID == "" {
+		return ""
+	}
+	msisdn, err := u.users.GetMSISDN(ctx, driverID)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(msisdn)
 }

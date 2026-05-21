@@ -1,3 +1,4 @@
+// Package postgres implements invoice repository using PostgreSQL.
 package postgres
 
 import (
@@ -53,7 +54,8 @@ func (r *invoiceRepo) Open(ctx context.Context, reservationID, driverID, idem st
 	var createdAt sql.NullTime
 	err = tx.QueryRowxContext(ctx, insertInvoiceSQL, reservationID, driverID, bookingFee, idem).Scan(&id, &createdAt)
 	if err != nil {
-		if pgErr, ok := err.(*pq.Error); ok && string(pgErr.Code) == codeUniqueViolation {
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && string(pgErr.Code) == codeUniqueViolation {
 			// Replay path: return the existing row, no extra writes.
 			_ = tx.Rollback()
 			return r.findByIdem(ctx, idem)
@@ -137,7 +139,7 @@ func (r *invoiceRepo) fetchLines(ctx context.Context, invoiceID string) ([]model
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []model.LineItem
 	for rows.Next() {
 		var lr lineRow
@@ -262,6 +264,7 @@ func (r invoiceRow) toModel() *model.Invoice {
 	out := &model.Invoice{
 		ID:             r.ID,
 		ReservationID:  r.ReservationID,
+		DriverID:       r.DriverID,
 		Status:         model.InvoiceStatus(r.Status),
 		TotalIDR:       r.TotalIDR,
 		IdempotencyKey: r.IdempotencyKey,

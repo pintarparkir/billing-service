@@ -33,6 +33,7 @@ type LineItem struct {
 type Invoice struct {
 	ID             string
 	ReservationID  string
+	DriverID       string
 	Status         InvoiceStatus
 	LineItems      []LineItem
 	TotalIDR       int64

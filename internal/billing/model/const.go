@@ -1,10 +1,11 @@
+// Package model defines billing domain models and constants.
 package model
 
 // gRPC method full names for the idempotency interceptor.
 // Keep in sync with proto in api/proto/billing/v1/billing.proto.
 const (
-	SCOPE_OPEN_INVOICE  = "/parkirpintar.billing.v1.BillingService/OpenInvoice"
-	SCOPE_CLOSE_INVOICE = "/parkirpintar.billing.v1.BillingService/CloseInvoice"
+	ScopeOpenInvoice  = "/parkirpintar.billing.v1.BillingService/OpenInvoice"
+	ScopeCloseInvoice = "/parkirpintar.billing.v1.BillingService/CloseInvoice"
 )
 
 // Routing keys we publish on parkirpintar.events.

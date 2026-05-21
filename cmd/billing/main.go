@@ -64,7 +64,11 @@ func main() {
 	if err != nil {
 		logger.Fatal(ctx, "postgres init failed", map[string]interface{}{logger.ErrorKey: err.Error()})
 	}
-	defer db.Close()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error(ctx, "db.Close failed", map[string]interface{}{logger.ErrorKey: closeErr.Error()})
+		}
+	}()
 
 	pub, err := rabbit.NewPublisher(cfg.RabbitURL, cfg.RabbitExchange)
 	if err != nil {
@@ -106,7 +110,7 @@ func main() {
 	// here. OpenInvoice still requires Idempotency-Key from the caller.
 	grpcSrv, err := grpcserver.NewGrpcServer(cfg.GrpcPort, grpcserver.Options{
 		IdempotencyStore:  idempotency.NewPostgresStore(db),
-		IdempotentMethods: []string{model.SCOPE_OPEN_INVOICE},
+		IdempotentMethods: []string{model.ScopeOpenInvoice},
 	})
 	if err != nil {
 		logger.Fatal(ctx, "grpc server init failed", map[string]interface{}{logger.ErrorKey: err.Error()})

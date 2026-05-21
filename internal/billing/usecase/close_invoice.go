@@ -26,10 +26,17 @@ func (u *billingUsecase) CloseInvoice(ctx context.Context, invoiceID string, ses
 		})
 	}
 
-	payload, _ := json.Marshal(map[string]any{
+	payloadMap := map[string]any{
 		"invoice_id": invoiceID,
 		"lines":      rawLines,
-	})
+	}
+	if current, err := u.repo.GetByID(ctx, invoiceID); err == nil && current != nil {
+		payloadMap["driver_id"] = current.DriverID
+		if msisdn := u.lookupMSISDN(ctx, current.DriverID); msisdn != "" {
+			payloadMap["msisdn"] = msisdn
+		}
+	}
+	payload, _ := json.Marshal(payloadMap)
 	return u.repo.Close(ctx, invoiceID, dbLines, payload)
 }
 

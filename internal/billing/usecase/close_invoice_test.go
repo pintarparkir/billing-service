@@ -37,6 +37,7 @@ func TestCloseInvoice_HappyPath_HourlySession(t *testing.T) {
 		Timezone:     jakarta,
 	}
 
+	repo.On("GetByID", ctx, "inv-close-1").Return(inv, nil)
 	repo.On("Close", ctx, "inv-close-1", mock.Anything, mock.Anything).Return(inv, nil)
 
 	uc := newUC(repo)
@@ -63,6 +64,7 @@ func TestCloseInvoice_FiltersZeroCancellationLine(t *testing.T) {
 		Timezone:    jakarta,
 	}
 
+	repo.On("GetByID", ctx, "inv-close-2").Return(inv, nil)
 	repo.On("Close", ctx, "inv-close-2",
 		mock.MatchedBy(func(lines []model.LineItem) bool {
 			for _, l := range lines {
@@ -99,6 +101,7 @@ func TestCloseInvoice_PostGraceCancelLine_NotFiltered(t *testing.T) {
 		Timezone:    jakarta,
 	}
 
+	repo.On("GetByID", ctx, "inv-close-3").Return(inv, nil)
 	repo.On("Close", ctx, "inv-close-3",
 		mock.MatchedBy(func(lines []model.LineItem) bool {
 			for _, l := range lines {

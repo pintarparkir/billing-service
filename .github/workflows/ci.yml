@@ -8,7 +8,7 @@ on:
 # Per-job permissions (SonarCloud: workflow-level permissions are a hotspot).
 
 env:
-  GO_VERSION: '1.25.0'
+  GO_VERSION: '1.25.10'
   GOLANGCI_LINT_VERSION: v2.12.2
 
 jobs:

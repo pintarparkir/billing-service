@@ -79,6 +79,8 @@ See [`../docs/architecture/erd/03-billing-service.md`](../docs/architecture/erd/
 - Unique constraint (`reservation_id`)
 - Critical indexes (`driver_id`, `status`, `created_at`)
 
+![ParkirPintar ERD](../user-service/ERD.jpg)
+
 ## API Reference
 
 ### gRPC Services (s2s, internal only)
@@ -153,8 +155,8 @@ git clone <repo> && cd <repo>
 cd billing-service
 cp configs/.env.example configs/.env
 
-# 2. Start shared infra (from repo root)
-cd ../infra && docker compose up -d
+# 2. Start shared infra (see https://github.com/pintarparkir/infra)
+cd ../infra && podman compose up -d
 
 # 3. Run migrations
 cd ../billing-service
@@ -254,6 +256,7 @@ Background worker scans reservations older than 5 minutes without invoice every 
 ## Related Documentation
 
 - **Architecture Overview:** [`../docs/README.md`](../docs/README.md)
+- **Shared Infra Docs:** [`infra`](https://github.com/pintarparkir/infra)
 - **API Documentation:** [`../docs/api-documentation/00-overview.md`](../docs/api-documentation/00-overview.md)
 - **Implementation Backlog:** [`../docs/implementation-todo/00-backlog.md`](../docs/implementation-todo/00-backlog.md)
 

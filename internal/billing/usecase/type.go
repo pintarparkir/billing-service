@@ -30,6 +30,10 @@ type BillingUsecase interface {
 	// If method=QRIS, returns a QRIS URL. If method=CC, triggers auto-debit via CCToken.
 	CreatePaymentRequest(ctx context.Context, input CreatePaymentRequestInput) (*CreatePaymentRequestOutput, error)
 
+	// HandlePaymentNotification processes webhook callbacks from payment gateway.
+	// Verifies signature, updates PR status, and emits success/failed event via outbox.
+	HandlePaymentNotification(ctx context.Context, payload []byte) error
+
 	WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) BillingUsecase
 }
 

@@ -59,6 +59,10 @@ func (m *MockBillingUsecase) CreatePaymentRequest(ctx context.Context, input use
 	return out, args.Error(1)
 }
 
+func (m *MockBillingUsecase) HandlePaymentNotification(ctx context.Context, payload []byte) error {
+	return m.Called(ctx, payload).Error(0)
+}
+
 func (m *MockBillingUsecase) WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) usecase.BillingUsecase {
 	args := m.Called(paymentRepo)
 	uc, _ := args.Get(0).(usecase.BillingUsecase)

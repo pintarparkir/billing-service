@@ -10,6 +10,7 @@ service BillingService {
   rpc OpenInvoice  (OpenInvoiceRequest)  returns (Invoice);
   rpc CloseInvoice (CloseInvoiceRequest) returns (Invoice);
   rpc GetInvoice   (GetInvoiceRequest)   returns (Invoice);
+  rpc CreatePaymentRequest (CreatePaymentReq) returns (PaymentRequest);
 }
 
 enum InvoiceStatus {
@@ -53,3 +54,22 @@ message CloseInvoiceRequest {
   google.protobuf.Timestamp checked_out_at = 3;
 }
 message GetInvoiceRequest   { string id = 1; }
+
+// CreatePaymentReq represents a new booking fee payment request to be created.
+message CreatePaymentReq {
+  string reservation_id = 1;  // ID of the reservation to charge
+  string driver_id = 2;       // Driver's unique identifier
+  int64 amount_idr = 3;       // Booking fee amount in IDR
+  string method = 4;          // Payment method: "QRIS" or "CC"
+  string cc_token = 5;        // Credit card token (required if method=CC)
+}
+
+// PaymentRequest represents the result of payment request creation.
+message PaymentRequest {
+  string id = 1;              // Unique ID for this payment request
+  string method = 2;          // Payment method used
+  string status = 3;          // Status: "PENDING", "SUCCESS", "FAILED"
+  string qris_url = 4;        // QRIS URL (only if method=QRIS)
+  string payment_ref = 5;     // Provider-facing reference ID
+  int64 expires_at = 6;       // Unix timestamp when payment expires
+}

@@ -10,8 +10,11 @@ const (
 
 // Routing keys we publish on parkirpintar.events.
 const (
-	EvtInvoiceOpened = "billing.invoice.opened.v1"
-	EvtInvoiceClosed = "billing.invoice.closed.v1"
+	EvtInvoiceOpened   = "billing.invoice.opened.v1"
+	EvtInvoiceClosed   = "billing.invoice.closed.v1"
+	EvtPaymentPending  = "billing.payment.pending.v1"
+	EvtPaymentSuccess  = "billing.payment.success.v1"
+	EvtPaymentFailed   = "billing.payment.failed.v1"
 )
 
 // Routing keys we subscribe to (from reservation-service).

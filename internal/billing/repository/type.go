@@ -42,8 +42,14 @@ type PaymentRequestRepository interface {
 	// GetByReservationID retrieves the payment request for a reservation.
 	GetByReservationID(ctx context.Context, reservationID string) (*model.PaymentRequest, error)
 
+	// GetByPaymentRef retrieves a payment request by provider-facing payment ref.
+	GetByPaymentRef(ctx context.Context, paymentRef string) (*model.PaymentRequest, error)
+
 	// UpdateStatus updates the status of a payment request.
 	UpdateStatus(ctx context.Context, id string, status model.PaymentRequestStatus) error
+
+	// UpdateStatusByPaymentRef atomically updates terminal status and appends outbox event.
+	UpdateStatusByPaymentRef(ctx context.Context, paymentRef string, status model.PaymentRequestStatus, eventType string, eventPayload []byte) (*model.PaymentRequest, error)
 }
 
 type OutboxRepository interface {

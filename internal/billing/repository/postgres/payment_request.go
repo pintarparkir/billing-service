@@ -116,6 +116,62 @@ func (r *paymentRequestRepo) UpdateStatus(ctx context.Context, id string, status
 	return err
 }
 
+const getPaymentRequestByRefSQL = `
+SELECT id, reservation_id, invoice_id, amount_idr, method, status, payment_ref, qris_url, expires_at, created_at, updated_at
+FROM payment_requests
+WHERE payment_ref = $1
+`
+
+func (r *paymentRequestRepo) GetByPaymentRef(ctx context.Context, paymentRef string) (*model.PaymentRequest, error) {
+	var row paymentRequestRow
+	err := r.db.QueryRowxContext(ctx, getPaymentRequestByRefSQL, paymentRef).StructScan(&row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, apperror.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return row.toModel(), nil
+}
+
+const updateStatusByRefSQL = `
+UPDATE payment_requests
+SET status = $2, updated_at = now()
+WHERE payment_ref = $1
+RETURNING id, reservation_id, invoice_id
+`
+
+func (r *paymentRequestRepo) UpdateStatusByPaymentRef(ctx context.Context, paymentRef string, status model.PaymentRequestStatus, eventType string, eventPayload []byte) (*model.PaymentRequest, error) {
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var id, reservationID, invoiceID string
+	err = tx.QueryRowxContext(ctx, updateStatusByRefSQL, paymentRef, string(status)).Scan(&id, &reservationID, &invoiceID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, apperror.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Insert outbox event
+	if eventPayload != nil {
+		_, err = tx.ExecContext(ctx, insertOutboxSQL, invoiceID, eventType, eventPayload)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return r.GetByID(ctx, id)
+}
+
 type paymentRequestRow struct {
 	ID            string      `db:"id"`
 	ReservationID string      `db:"reservation_id"`

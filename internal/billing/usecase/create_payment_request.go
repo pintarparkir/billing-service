@@ -100,12 +100,12 @@ func (u *billingUsecase) CreatePaymentRequest(ctx context.Context, input CreateP
 }
 
 // generatePaymentIntent calls payment-service to create SNAP QRIS intent.
-func (u *billingUsecase) generatePaymentIntent(ctx context.Context, reservationID string, amountIDR int64) string {
-	if u.client == nil {
+func (u *billingUsecase) generatePaymentIntent(ctx context.Context, invoiceID string, amountIDR int64) string {
+	if u.payment == nil {
 		return "" // fallback if payment service not configured
 	}
 
-	resp, err := u.client.CreateQrisIntent(ctx, reservationID, amountIDR)
+	resp, err := u.payment.CreateQrisIntent(ctx, invoiceID, amountIDR)
 	if err != nil {
 		logger.Error(ctx, "payment-service QrisIntent failed", map[string]interface{}{"error": err.Error()})
 		return ""

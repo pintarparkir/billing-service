@@ -43,6 +43,7 @@ type billingUsecase struct {
 	engine      *pricing.Engine
 	cfg         pricing.Config
 	users       grpcclient.UserClient
+	payment     grpcclient.PaymentClient
 }
 
 func NewBillingUsecase(repo repository.InvoiceRepository, engine *pricing.Engine, cfg pricing.Config) BillingUsecase {
@@ -58,6 +59,12 @@ func (u *billingUsecase) WithUserClient(users grpcclient.UserClient) *billingUse
 // Call this in main after NewBillingUsecase when the payment_requests table is ready.
 func (u *billingUsecase) WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) BillingUsecase {
 	u.paymentRepo = paymentRepo
+	return u
+}
+
+// WithPaymentClient wires in the payment-service gRPC client for QRIS intent creation.
+func (u *billingUsecase) WithPaymentClient(client grpcclient.PaymentClient) *billingUsecase {
+	u.payment = client
 	return u
 }
 

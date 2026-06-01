@@ -49,6 +49,22 @@ func (m *mockPaymentRequestRepository) UpdateStatus(ctx context.Context, id stri
 	return args.Error(0)
 }
 
+func (m *mockPaymentRequestRepository) GetByPaymentRef(ctx context.Context, paymentRef string) (*model.PaymentRequest, error) {
+	args := m.Called(ctx, paymentRef)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.PaymentRequest), args.Error(1)
+}
+
+func (m *mockPaymentRequestRepository) UpdateStatusByPaymentRef(ctx context.Context, paymentRef string, status model.PaymentRequestStatus, eventType string, eventPayload []byte) (*model.PaymentRequest, error) {
+	args := m.Called(ctx, paymentRef, status, eventType, eventPayload)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.PaymentRequest), args.Error(1)
+}
+
 func newUCWithPaymentRepo(repo *mockrepo.MockInvoiceRepository, paymentRepo repository.PaymentRequestRepository) usecase.BillingUsecase {
 	return usecase.NewBillingUsecase(
 		repo,

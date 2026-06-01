@@ -2,12 +2,12 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/farid/billing-service/internal/billing/model"
 	apperror "github.com/farid/billing-service/pkg/error"
+	"github.com/farid/billing-service/pkg/logger"
 )
 
 type CreatePaymentRequestInput struct {
@@ -79,9 +79,9 @@ func (u *billingUsecase) CreatePaymentRequest(ctx context.Context, input CreateP
 		ExpiresAt:     expiresAt,
 	}
 
-	// Generate QRIS URL by calling payment-service
+	// Generate QRIS URL by calling payment-service (pass invoice ID for SNAP intent)
 	if paymentMethod == model.PaymentMethodQRIS {
-		paymentReq.QRISURL = u.generatePaymentIntent(ctx, input.ReservationID, input.AmountIDR)
+		paymentReq.QRISURL = u.generatePaymentIntent(ctx, invoice.ID, input.AmountIDR)
 	}
 
 	created, err := u.paymentRepo.Create(ctx, paymentReq)

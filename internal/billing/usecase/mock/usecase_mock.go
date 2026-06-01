@@ -11,6 +11,7 @@ import (
 
 	"github.com/farid/billing-service/internal/billing/model"
 	"github.com/farid/billing-service/internal/billing/repository"
+	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/internal/billing/usecase"
 	"github.com/farid/billing-service/pkg/pricing"
 )
@@ -65,6 +66,12 @@ func (m *MockBillingUsecase) HandlePaymentNotification(ctx context.Context, payl
 
 func (m *MockBillingUsecase) WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) usecase.BillingUsecase {
 	args := m.Called(paymentRepo)
+	uc, _ := args.Get(0).(usecase.BillingUsecase)
+	return uc
+}
+
+func (m *MockBillingUsecase) WithPaymentClient(client grpcclient.PaymentClient) usecase.BillingUsecase {
+	args := m.Called(client)
 	uc, _ := args.Get(0).(usecase.BillingUsecase)
 	return uc
 }

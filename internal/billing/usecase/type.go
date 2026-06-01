@@ -35,6 +35,7 @@ type BillingUsecase interface {
 	HandlePaymentNotification(ctx context.Context, payload []byte) error
 
 	WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) BillingUsecase
+	WithPaymentClient(client grpcclient.PaymentClient) BillingUsecase
 }
 
 type billingUsecase struct {
@@ -63,7 +64,7 @@ func (u *billingUsecase) WithPaymentRequestRepository(paymentRepo repository.Pay
 }
 
 // WithPaymentClient wires in the payment-service gRPC client for QRIS intent creation.
-func (u *billingUsecase) WithPaymentClient(client grpcclient.PaymentClient) *billingUsecase {
+func (u *billingUsecase) WithPaymentClient(client grpcclient.PaymentClient) BillingUsecase {
 	u.payment = client
 	return u
 }

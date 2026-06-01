@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/farid/billing-service/internal/billing/model"
+	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/internal/billing/repository"
 	mockrepo "github.com/farid/billing-service/internal/billing/repository/mock"
 	"github.com/farid/billing-service/internal/billing/usecase"
@@ -63,6 +64,27 @@ func (m *mockPaymentRequestRepository) UpdateStatusByPaymentRef(ctx context.Cont
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*model.PaymentRequest), args.Error(1)
+}
+
+// mockPaymentClient implements PaymentClient for testing
+type mockPaymentClient struct {
+	mock.Mock
+}
+
+func (m *mockPaymentClient) CreateQrisIntent(ctx context.Context, invoiceID string, amountIDR int64) (*grpcclient.QrisIntentResult, error) {
+	args := m.Called(ctx, invoiceID, amountIDR)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*grpcclient.QrisIntentResult), args.Error(1)
+}
+
+func (m *mockPaymentClient) GetPayment(ctx context.Context, paymentID string) (*grpcclient.PaymentResult, error) {
+	args := m.Called(ctx, paymentID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*grpcclient.PaymentResult), args.Error(1)
 }
 
 func newUCWithPaymentRepo(repo *mockrepo.MockInvoiceRepository, paymentRepo repository.PaymentRequestRepository) usecase.BillingUsecase {
@@ -163,9 +185,11 @@ func TestCreatePaymentRequest_QRISHappyPath(t *testing.T) {
 	ctx := context.Background()
 	repo := new(mockrepo.MockInvoiceRepository)
 	paymentRepo := new(mockPaymentRequestRepository)
-	uc := newUCWithPaymentRepo(repo, paymentRepo)
+	paymentClient := new(mockPaymentClient)
+	uc := newUCWithPaymentRepo(repo, paymentRepo).WithPaymentClient(paymentClient)
 
 	invoice := &model.Invoice{ID: "inv-1", ReservationID: "res-1", Status: model.InvoiceOpen}
+	redirectURL := "https://app.midtrans.com/snap/v1/transactions/pay-1/pay"
 	created := &model.PaymentRequest{
 		ID:            "pr-1",
 		ReservationID: "res-1",
@@ -174,18 +198,19 @@ func TestCreatePaymentRequest_QRISHappyPath(t *testing.T) {
 		Method:        model.PaymentMethodQRIS,
 		Status:        model.PaymentRequestPending,
 		PaymentRef:    "PAY-pr-1",
-		QRISURL:       "https://qris.example.com/pay?ref=res-1&amount=5000",
+		QRISURL:       redirectURL,
 		ExpiresAt:     time.Now().Add(15 * time.Minute),
 	}
 
 	repo.On("GetByReservationID", ctx, "res-1").Return(invoice, nil)
+	paymentClient.On("CreateQrisIntent", ctx, "inv-1", int64(5000)).Return(&grpcclient.QrisIntentResult{RedirectURL: redirectURL}, nil)
 	paymentRepo.On("Create", ctx, mock.MatchedBy(func(req *model.PaymentRequest) bool {
 		return req.ReservationID == "res-1" &&
 			req.InvoiceID == "inv-1" &&
 			req.AmountIDR == 5000 &&
 			req.Method == model.PaymentMethodQRIS &&
 			req.Status == model.PaymentRequestPending &&
-			req.QRISURL != ""
+			req.QRISURL == redirectURL
 	})).Return(created, nil)
 
 	got, err := uc.CreatePaymentRequest(ctx, usecase.CreatePaymentRequestInput{
@@ -259,9 +284,11 @@ func TestCreatePaymentRequest_DefaultsToQRIS(t *testing.T) {
 	ctx := context.Background()
 	repo := new(mockrepo.MockInvoiceRepository)
 	paymentRepo := new(mockPaymentRequestRepository)
-	uc := newUCWithPaymentRepo(repo, paymentRepo)
+	paymentClient := new(mockPaymentClient)
+	uc := newUCWithPaymentRepo(repo, paymentRepo).WithPaymentClient(paymentClient)
 
 	invoice := &model.Invoice{ID: "inv-1", ReservationID: "res-1", Status: model.InvoiceOpen}
+	redirectURL := "https://app.midtrans.com/snap/v1/transactions/pay-3/pay"
 	created := &model.PaymentRequest{
 		ID:            "pr-3",
 		ReservationID: "res-1",
@@ -270,13 +297,14 @@ func TestCreatePaymentRequest_DefaultsToQRIS(t *testing.T) {
 		Method:        model.PaymentMethodQRIS,
 		Status:        model.PaymentRequestPending,
 		PaymentRef:    "PAY-pr-3",
-		QRISURL:       "https://qris.example.com/pay?ref=res-1&amount=5000",
+		QRISURL:       redirectURL,
 		ExpiresAt:     time.Now().Add(15 * time.Minute),
 	}
 
 	repo.On("GetByReservationID", ctx, "res-1").Return(invoice, nil)
+	paymentClient.On("CreateQrisIntent", ctx, "inv-1", int64(5000)).Return(&grpcclient.QrisIntentResult{RedirectURL: redirectURL}, nil)
 	paymentRepo.On("Create", ctx, mock.MatchedBy(func(req *model.PaymentRequest) bool {
-		return req.Method == model.PaymentMethodQRIS && req.QRISURL != ""
+		return req.Method == model.PaymentMethodQRIS && req.QRISURL == redirectURL
 	})).Return(created, nil)
 
 	got, err := uc.CreatePaymentRequest(ctx, usecase.CreatePaymentRequestInput{
@@ -388,9 +416,11 @@ func TestCreatePaymentRequest_WhitespaceMethodDefaultsToQRIS(t *testing.T) {
 	ctx := context.Background()
 	repo := new(mockrepo.MockInvoiceRepository)
 	paymentRepo := new(mockPaymentRequestRepository)
-	uc := newUCWithPaymentRepo(repo, paymentRepo)
+	paymentClient := new(mockPaymentClient)
+	uc := newUCWithPaymentRepo(repo, paymentRepo).WithPaymentClient(paymentClient)
 
 	invoice := &model.Invoice{ID: "inv-1", ReservationID: "res-1", Status: model.InvoiceOpen}
+	redirectURL := "https://app.midtrans.com/snap/v1/transactions/pay-4/pay"
 	created := &model.PaymentRequest{
 		ID:            "pr-4",
 		ReservationID: "res-1",
@@ -399,13 +429,14 @@ func TestCreatePaymentRequest_WhitespaceMethodDefaultsToQRIS(t *testing.T) {
 		Method:        model.PaymentMethodQRIS,
 		Status:        model.PaymentRequestPending,
 		PaymentRef:    "PAY-pr-4",
-		QRISURL:       "https://qris.example.com/pay?ref=res-1&amount=5000",
+		QRISURL:       redirectURL,
 		ExpiresAt:     time.Now().Add(15 * time.Minute),
 	}
 
 	repo.On("GetByReservationID", ctx, "res-1").Return(invoice, nil)
+	paymentClient.On("CreateQrisIntent", ctx, "inv-1", int64(5000)).Return(&grpcclient.QrisIntentResult{RedirectURL: redirectURL}, nil)
 	paymentRepo.On("Create", ctx, mock.MatchedBy(func(req *model.PaymentRequest) bool {
-		return req.Method == model.PaymentMethodQRIS
+		return req.Method == model.PaymentMethodQRIS && req.QRISURL == redirectURL
 	})).Return(created, nil)
 
 	got, err := uc.CreatePaymentRequest(ctx, usecase.CreatePaymentRequestInput{

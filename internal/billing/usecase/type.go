@@ -25,13 +25,20 @@ type BillingUsecase interface {
 
 	// ApplyNoShowFee is invoked from reservation.expired.v1.
 	ApplyNoShowFee(ctx context.Context, reservationID string) error
+
+	// CreatePaymentRequest creates a booking-fee payment request for a reservation.
+	// If method=QRIS, returns a QRIS URL. If method=CC, triggers auto-debit via CCToken.
+	CreatePaymentRequest(ctx context.Context, input CreatePaymentRequestInput) (*CreatePaymentRequestOutput, error)
+
+	WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) BillingUsecase
 }
 
 type billingUsecase struct {
-	repo   repository.InvoiceRepository
-	engine *pricing.Engine
-	cfg    pricing.Config
-	users  grpcclient.UserClient
+	repo        repository.InvoiceRepository
+	paymentRepo repository.PaymentRequestRepository
+	engine      *pricing.Engine
+	cfg         pricing.Config
+	users       grpcclient.UserClient
 }
 
 func NewBillingUsecase(repo repository.InvoiceRepository, engine *pricing.Engine, cfg pricing.Config) BillingUsecase {
@@ -40,6 +47,13 @@ func NewBillingUsecase(repo repository.InvoiceRepository, engine *pricing.Engine
 
 func (u *billingUsecase) WithUserClient(users grpcclient.UserClient) *billingUsecase {
 	u.users = users
+	return u
+}
+
+// WithPaymentRequestRepository wires in the payment request repository.
+// Call this in main after NewBillingUsecase when the payment_requests table is ready.
+func (u *billingUsecase) WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) BillingUsecase {
+	u.paymentRepo = paymentRepo
 	return u
 }
 

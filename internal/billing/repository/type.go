@@ -31,6 +31,21 @@ type InvoiceRepository interface {
 	AppendLine(ctx context.Context, invoiceID string, line model.LineItem, eventPayload []byte) (*model.Invoice, error)
 }
 
+// PaymentRequestRepository persists payment requests.
+type PaymentRequestRepository interface {
+	// Create inserts a new payment request and returns it with generated ID.
+	Create(ctx context.Context, req *model.PaymentRequest) (*model.PaymentRequest, error)
+
+	// GetByID retrieves a payment request by its ID.
+	GetByID(ctx context.Context, id string) (*model.PaymentRequest, error)
+
+	// GetByReservationID retrieves the payment request for a reservation.
+	GetByReservationID(ctx context.Context, reservationID string) (*model.PaymentRequest, error)
+
+	// UpdateStatus updates the status of a payment request.
+	UpdateStatus(ctx context.Context, id string, status model.PaymentRequestStatus) error
+}
+
 type OutboxRepository interface {
 	FetchUnpublished(ctx context.Context, limit int) ([]OutboxRow, error)
 	MarkPublished(ctx context.Context, ids []int64) error

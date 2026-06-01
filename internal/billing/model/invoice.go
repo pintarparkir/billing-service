@@ -36,6 +36,10 @@ type Invoice struct {
 	DriverID       string
 	Status         InvoiceStatus
 	LineItems      []LineItem
+	BookingFeeIDR  int64
+	ParkingFeeIDR  int64
+	PaymentMethod  string
+	PaymentRef     string
 	TotalIDR       int64
 	IdempotencyKey string
 	CreatedAt      time.Time

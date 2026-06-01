@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/farid/billing-service/internal/billing/model"
+	"github.com/farid/billing-service/internal/billing/repository"
 	"github.com/farid/billing-service/internal/billing/usecase"
 	"github.com/farid/billing-service/pkg/pricing"
 )
@@ -50,4 +51,16 @@ func (m *MockBillingUsecase) ApplyCancelFee(ctx context.Context, reservationID s
 
 func (m *MockBillingUsecase) ApplyNoShowFee(ctx context.Context, reservationID string) error {
 	return m.Called(ctx, reservationID).Error(0)
+}
+
+func (m *MockBillingUsecase) CreatePaymentRequest(ctx context.Context, input usecase.CreatePaymentRequestInput) (*usecase.CreatePaymentRequestOutput, error) {
+	args := m.Called(ctx, input)
+	out, _ := args.Get(0).(*usecase.CreatePaymentRequestOutput)
+	return out, args.Error(1)
+}
+
+func (m *MockBillingUsecase) WithPaymentRequestRepository(paymentRepo repository.PaymentRequestRepository) usecase.BillingUsecase {
+	args := m.Called(paymentRepo)
+	uc, _ := args.Get(0).(usecase.BillingUsecase)
+	return uc
 }

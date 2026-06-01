@@ -3,11 +3,11 @@
 // Wires:
 //   - configs → logger → otel
 //   - postgres + rabbitmq publisher + subscriber
-//   - repository (invoice + outbox)
+//   - repository (invoice + outbox + payment_requests)
 //   - pricing engine (pure)
 //   - usecase
 //   - background workers (outbox publisher)
-//   - RabbitMQ consumer (reservation events → cancel/no-show/close)
+//   - RabbitMQ consumer (reservation events + payment events)
 //
 // gRPC server registration is conditional on `buf generate` having produced
 // api/proto/billing/v1/*.pb.go. Until then the service runs only as an
@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/farid/billing-service/internal/billing/consumer"
 	billgrpc "github.com/farid/billing-service/internal/billing/handler/grpc"
+	"github.com/farid/billing-service/internal/billing/handler/http"
 	billrepo "github.com/farid/billing-service/internal/billing/repository/postgres"
 	billuc "github.com/farid/billing-service/internal/billing/usecase"
 	"github.com/farid/billing-service/internal/billing/worker"
@@ -101,9 +103,10 @@ func main() {
 
 	repo := billrepo.NewInvoiceRepository(db)
 	obRepo := billrepo.NewOutboxRepository(db)
-	uc := billuc.NewBillingUsecase(repo, engine, pricingCfg)
+	paymentRepo := billrepo.NewPaymentRequestRepository(db)
+	uc := billuc.NewBillingUsecase(repo, engine, pricingCfg).WithPaymentRequestRepository(paymentRepo)
 
-	// ── gRPC server (s2s callers — reservation-service.OpenInvoice/CloseInvoice) ─
+	// ── gRPC server (s2s callers — reservation-service.CreatePaymentRequest) ─
 	// CloseInvoice is naturally idempotent at the row level (status != OPEN
 	// short-circuits) and reservation-service doesn't have a stable client key
 	// to pass on the close path, so we don't enforce header-level idempotency
@@ -122,15 +125,32 @@ func main() {
 		}
 	}()
 
+	// ── HTTP server (payment gateway webhooks) ───────────────────────────────
+	webhookHandler := http.NewWebhookHandler(uc, cfg.MidtransSigningKey)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
+	httpServer := &http.Server{
+		Addr:         fmt.Sprintf(":%d", cfg.HttpPort),
+		Handler:      mux,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+	}
+	go func() {
+		logger.Info(ctx, "HTTP server starting", map[string]interface{}{"port": cfg.HttpPort})
+		if err := httpServer.ListenAndServe(); err != nil && err.Error() != "http: Server closed" {
+			logger.Error(ctx, "http serve failed", map[string]interface{}{logger.ErrorKey: err.Error()})
+		}
+	}()
+
 	// ── Background workers ───────────────────────────────────────────────────
 	go worker.NewOutboxPublisher(obRepo, pub).Run(ctx)
 
-	// ── RabbitMQ consumer (reservation events) ───────────────────────────────
+	// ── RabbitMQ consumer (reservation events + payment confirmation) ─────────
 	c := consumer.NewReservation(uc)
 	go func() {
 		logger.Info(ctx, "consumer: subscribing", map[string]interface{}{
 			"queue": cfg.RabbitQueue,
-			"keys":  "reservation.cancelled.v1, reservation.expired.v1, reservation.checked_out.v1",
+			"keys":  "reservation.cancelled.v1, reservation.expired.v1, reservation.checked_out.v1, billing.payment.success.v1, billing.payment.failed.v1",
 		})
 		if err := sub.Consume(ctx, c.Handle); err != nil {
 			logger.Error(ctx, "consumer: stopped", map[string]interface{}{logger.ErrorKey: err.Error()})
@@ -141,6 +161,9 @@ func main() {
 	<-ctx.Done()
 	logger.Info(context.Background(), "shutdown signal received", nil)
 	grpcSrv.Shutdown()
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_ = httpServer.Shutdown(shutdownCtx)
 	if err := logger.Sync(); err != nil {
 		fmt.Fprintln(os.Stderr, "logger sync:", err)
 	}

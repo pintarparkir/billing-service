@@ -79,9 +79,9 @@ func (u *billingUsecase) CreatePaymentRequest(ctx context.Context, input CreateP
 		ExpiresAt:     expiresAt,
 	}
 
-	// Generate QRIS URL if method is QRIS
+	// Generate QRIS URL by calling payment-service
 	if paymentMethod == model.PaymentMethodQRIS {
-		paymentReq.QRISURL = u.generateQRISURL(input.ReservationID, input.AmountIDR)
+		paymentReq.QRISURL = u.generatePaymentIntent(ctx, input.ReservationID, input.AmountIDR)
 	}
 
 	created, err := u.paymentRepo.Create(ctx, paymentReq)
@@ -90,17 +90,26 @@ func (u *billingUsecase) CreatePaymentRequest(ctx context.Context, input CreateP
 	}
 
 	return &CreatePaymentRequestOutput{
-		ID:        created.ID,
-		Method:    string(created.Method),
-		Status:    string(created.Status),
-		QRISURL:   created.QRISURL,
+		ID:         created.ID,
+		Method:     string(created.Method),
+		Status:     string(created.Status),
+		QRISURL:    created.QRISURL,
 		PaymentRef: created.PaymentRef,
-		ExpiresAt: created.ExpiresAt.Unix(),
+		ExpiresAt:  created.ExpiresAt.Unix(),
 	}, nil
 }
 
-// generateQRISURL generates a mock QRIS URL for the payment request.
-// In production, this would call the actual QRIS provider API.
-func (u *billingUsecase) generateQRISURL(reservationID string, amountIDR int64) string {
-	return fmt.Sprintf("https://qris.example.com/pay?ref=%s&amount=%d", reservationID, amountIDR)
+// generatePaymentIntent calls payment-service to create SNAP QRIS intent.
+func (u *billingUsecase) generatePaymentIntent(ctx context.Context, reservationID string, amountIDR int64) string {
+	if u.client == nil {
+		return "" // fallback if payment service not configured
+	}
+
+	resp, err := u.client.CreateQrisIntent(ctx, reservationID, amountIDR)
+	if err != nil {
+		logger.Error(ctx, "payment-service QrisIntent failed", map[string]interface{}{"error": err.Error()})
+		return ""
+	}
+	// Return RedirectURL from SNAP response
+	return resp.RedirectURL
 }

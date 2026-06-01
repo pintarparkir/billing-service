@@ -253,6 +253,135 @@ Background worker scans reservations older than 5 minutes without invoice every 
 - **Idempotency:** Scoped per reservation_id to prevent duplicate invoices.
 - **Pricing engine:** Pure-functional, no side effects, fully deterministic.
 
+## Business Flow Logic
+
+### Billing Service in Reservation Lifecycle
+
+Billing-service adalah **event consumer** yang bereaksi terhadap perubahan state reservation. Service ini tidak memiliki flow bisnis mandiri yang di-trigger langsung oleh user.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant RMQ as RabbitMQ
+    participant Billing as Billing Service
+    participant Pricing as Pricing Engine
+    participant DB as Postgres DB
+    participant Notif as Notification Service
+    
+    Note over RMQ,Notif: Event 1: Reservation Created → Open Invoice
+    
+    RMQ-->Billing: CONSUME reservation.created.v1
+    activate Billing
+    
+    Billing->>DB: BEGIN
+    Billing->>DB: SELECT * FROM invoice WHERE reservation_id = ?
+    
+    alt Invoice not exists
+        Billing->>DB: INSERT INTO invoice (<br/>reservation_id, driver_id,<br/>status='OPEN')
+        Billing->>DB: INSERT INTO invoice_line (<br/>kind='BOOKING', amount=2000)
+        Billing->>DB: COMMIT
+        Note right of Billing: Idempotent on reservation_id
+    else Invoice exists (replay)
+        Billing->>DB: COMMIT (skip)
+    end
+    
+    deactivate Billing
+    
+    Note over RMQ,Notif: Event 2: Check-out → Close Invoice & Calculate
+    
+    RMQ-->Billing: CONSUME reservation.checked_out.v1
+    activate Billing
+    
+    Billing->>DB: SELECT * FROM invoice WHERE reservation_id = ? FOR UPDATE
+    Billing->>DB: SELECT checked_in_at, checked_out_at FROM reservation
+    
+    %% Pricing engine invocation
+    Billing->>Pricing: CalculatePricing({<br/>checked_in: 08:00,<br/>checked_out: 10:30,<br/>vehicle_type: 'CAR'})
+    activate Pricing
+    Note right of Pricing: Pure functional<br/>No time.Now() calls<br/>Deterministic output
+    
+    Pricing->>Pricing: Duration: 2.5 hours
+    Pricing->>Pricing: BOOKING fee: 2,000 (flat)
+    Pricing->>Pricing: HOURLY fee: 12,500 (2.5h × 5,000)
+    Pricing->>Pricing: No OVERNIGHT (within 06:00-22:00)
+    
+    Pricing-->>Billing: {total: 14500, lines: [...]}
+    deactivate Pricing
+    
+    Billing->>DB: BEGIN
+    Billing->>DB: UPDATE invoice SET<br/>total_idr=14500, status='CLOSED'
+    Billing->>DB: INSERT INTO invoice_line (<br/>kind='HOURLY', amount=12500)
+    Billing->>DB: INSERT INTO outbox_event(<br/>topic='billing.invoice.closed.v1')
+    Billing->>DB: COMMIT
+    
+    Billing->>RMQ: PUBLISH billing.invoice.closed.v1
+    RMQ-->Notif: CONSUME → Send SMS receipt
+    
+    deactivate Billing
+    
+    Note over RMQ,Notif: Event 3: Cancellation → Apply Cancel Fee
+    
+    RMQ-->Billing: CONSUME reservation.cancelled.v1
+    activate Billing
+    
+    Billing->>Billing: CalculateCancelFee(<br/>cancelled_at: 08:00,<br/>hold_expiry: 08:10)
+    
+    alt Cancelled within grace period (30min)
+        Billing->>DB: INSERT INTO invoice_line (<br/>kind='CANCELLATION', amount=2000)
+        Note right of Billing: Booking fee retained as penalty
+    else Early cancellation
+        Billing->>DB: No fee (free cancel)
+    end
+    
+    Billing->>DB: UPDATE invoice SET status='CLOSED'
+    Billing->>DB: COMMIT
+    
+    deactivate Billing
+    
+    Note over RMQ,Notif: Event 4: No-show → Apply No-show Fee
+    
+    RMQ-->Billing: CONSUME reservation.expired.v1
+    activate Billing
+    
+    Billing->>DB: BEGIN
+    Billing->>DB: INSERT INTO invoice_line (<br/>kind='NOSHOW', amount=5000)
+    Billing->>DB: UPDATE invoice SET status='CLOSED',<br/>total = booking + noshow
+    Billing->>DB: COMMIT
+    
+    deactivate Billing
+```
+
+### Pricing Engine Rules
+
+| Fee Type | Condition | CAR Rate | MOTORCYCLE Rate |
+|----------|-----------|----------|-----------------|
+| **BOOKING** | Always (flat) | IDR 2,000 | IDR 1,000 |
+| **HOURLY** | After check-out | IDR 5,000/h | IDR 2,000/h |
+| **OVERNIGHT** | 22:00-06:00 | IDR 30,000 | IDR 15,000 |
+| **CANCELLATION** | Within 30min of hold expiry | Booking fee retained | Booking fee retained |
+| **NOSHOW** | Reservation expired | IDR 5,000 penalty | IDR 2,500 penalty |
+
+### Invoice Lifecycle
+
+```
+┌──────────┐    reservation.created.v1     ┌──────────┐
+│  (none)  │ ────────────────────────────▶ │   OPEN   │
+└──────────┘                               └────┬─────┘
+                                                │
+                      ┌─────────────────────────┼─────────────────────────┐
+                      │                         │                         │
+                      ▼                         ▼                         ▼
+         reservation.checked_out.v1    reservation.cancelled.v1   reservation.expired.v1
+                      │                         │                         │
+                      ▼                         ▼                         ▼
+               ┌────────────┐            ┌────────────┐            ┌────────────┐
+               │   CLOSED   │            │   CLOSED   │            │   CLOSED   │
+               │ (paid due) │            │(cancel fee)│            │(noshow fee)│
+               └────────────┘            └────────────┘            └────────────┘
+```
+
+---
+
 ## Related Documentation
 
 - **Architecture Overview:** [`../docs/README.md`](../docs/README.md)

@@ -27,7 +27,7 @@ import (
 
 	"github.com/farid/billing-service/internal/billing/consumer"
 	billgrpc "github.com/farid/billing-service/internal/billing/handler/grpc"
-	"github.com/farid/billing-service/internal/billing/handler/http"
+	billhttp "github.com/farid/billing-service/internal/billing/handler/http"
 	billrepo "github.com/farid/billing-service/internal/billing/repository/postgres"
 	billuc "github.com/farid/billing-service/internal/billing/usecase"
 	"github.com/farid/billing-service/internal/billing/worker"
@@ -126,17 +126,17 @@ func main() {
 	}()
 
 	// ── HTTP server (payment gateway webhooks) ───────────────────────────────
-	webhookHandler := http.NewWebhookHandler(uc, cfg.MidtransSigningKey)
+	webhookHandler := billhttp.NewWebhookHandler(uc, "") // TODO: add config for Midtrans signing key
 	mux := http.NewServeMux()
 	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
 	httpServer := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.HttpPort),
+		Addr:         fmt.Sprintf(":%d", 8084),
 		Handler:      mux,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}
 	go func() {
-		logger.Info(ctx, "HTTP server starting", map[string]interface{}{"port": cfg.HttpPort})
+		logger.Info(ctx, "HTTP server starting", map[string]interface{}{"port": 8084})
 		if err := httpServer.ListenAndServe(); err != nil && err.Error() != "http: Server closed" {
 			logger.Error(ctx, "http serve failed", map[string]interface{}{logger.ErrorKey: err.Error()})
 		}

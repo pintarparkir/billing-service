@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v7.34.1
-// source: api/proto/billing/v1/billing.proto
+// source: billing/v1/billing.proto
 
 package billingv1
 
@@ -61,11 +61,11 @@ func (x InvoiceStatus) String() string {
 }
 
 func (InvoiceStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_proto_billing_v1_billing_proto_enumTypes[0].Descriptor()
+	return file_billing_v1_billing_proto_enumTypes[0].Descriptor()
 }
 
 func (InvoiceStatus) Type() protoreflect.EnumType {
-	return &file_api_proto_billing_v1_billing_proto_enumTypes[0]
+	return &file_billing_v1_billing_proto_enumTypes[0]
 }
 
 func (x InvoiceStatus) Number() protoreflect.EnumNumber {
@@ -74,7 +74,7 @@ func (x InvoiceStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use InvoiceStatus.Descriptor instead.
 func (InvoiceStatus) EnumDescriptor() ([]byte, []int) {
-	return file_api_proto_billing_v1_billing_proto_rawDescGZIP(), []int{0}
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{0}
 }
 
 type LineKind int32
@@ -119,11 +119,11 @@ func (x LineKind) String() string {
 }
 
 func (LineKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_proto_billing_v1_billing_proto_enumTypes[1].Descriptor()
+	return file_billing_v1_billing_proto_enumTypes[1].Descriptor()
 }
 
 func (LineKind) Type() protoreflect.EnumType {
-	return &file_api_proto_billing_v1_billing_proto_enumTypes[1]
+	return &file_billing_v1_billing_proto_enumTypes[1]
 }
 
 func (x LineKind) Number() protoreflect.EnumNumber {
@@ -132,7 +132,7 @@ func (x LineKind) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use LineKind.Descriptor instead.
 func (LineKind) EnumDescriptor() ([]byte, []int) {
-	return file_api_proto_billing_v1_billing_proto_rawDescGZIP(), []int{1}
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{1}
 }
 
 type LineItem struct {
@@ -146,7 +146,7 @@ type LineItem struct {
 
 func (x *LineItem) Reset() {
 	*x = LineItem{}
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[0]
+	mi := &file_billing_v1_billing_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -158,7 +158,7 @@ func (x *LineItem) String() string {
 func (*LineItem) ProtoMessage() {}
 
 func (x *LineItem) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[0]
+	mi := &file_billing_v1_billing_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -171,7 +171,7 @@ func (x *LineItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LineItem.ProtoReflect.Descriptor instead.
 func (*LineItem) Descriptor() ([]byte, []int) {
-	return file_api_proto_billing_v1_billing_proto_rawDescGZIP(), []int{0}
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *LineItem) GetId() string {
@@ -211,7 +211,7 @@ type Invoice struct {
 
 func (x *Invoice) Reset() {
 	*x = Invoice{}
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[1]
+	mi := &file_billing_v1_billing_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -223,7 +223,7 @@ func (x *Invoice) String() string {
 func (*Invoice) ProtoMessage() {}
 
 func (x *Invoice) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[1]
+	mi := &file_billing_v1_billing_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -236,7 +236,7 @@ func (x *Invoice) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Invoice.ProtoReflect.Descriptor instead.
 func (*Invoice) Descriptor() ([]byte, []int) {
-	return file_api_proto_billing_v1_billing_proto_rawDescGZIP(), []int{1}
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Invoice) GetId() string {
@@ -305,7 +305,7 @@ type OpenInvoiceRequest struct {
 
 func (x *OpenInvoiceRequest) Reset() {
 	*x = OpenInvoiceRequest{}
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[2]
+	mi := &file_billing_v1_billing_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -317,7 +317,7 @@ func (x *OpenInvoiceRequest) String() string {
 func (*OpenInvoiceRequest) ProtoMessage() {}
 
 func (x *OpenInvoiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[2]
+	mi := &file_billing_v1_billing_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -330,7 +330,7 @@ func (x *OpenInvoiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenInvoiceRequest.ProtoReflect.Descriptor instead.
 func (*OpenInvoiceRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_billing_v1_billing_proto_rawDescGZIP(), []int{2}
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *OpenInvoiceRequest) GetReservationId() string {
@@ -358,7 +358,7 @@ type CloseInvoiceRequest struct {
 
 func (x *CloseInvoiceRequest) Reset() {
 	*x = CloseInvoiceRequest{}
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[3]
+	mi := &file_billing_v1_billing_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -370,7 +370,7 @@ func (x *CloseInvoiceRequest) String() string {
 func (*CloseInvoiceRequest) ProtoMessage() {}
 
 func (x *CloseInvoiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[3]
+	mi := &file_billing_v1_billing_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -383,7 +383,7 @@ func (x *CloseInvoiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseInvoiceRequest.ProtoReflect.Descriptor instead.
 func (*CloseInvoiceRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_billing_v1_billing_proto_rawDescGZIP(), []int{3}
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CloseInvoiceRequest) GetInvoiceId() string {
@@ -416,7 +416,7 @@ type GetInvoiceRequest struct {
 
 func (x *GetInvoiceRequest) Reset() {
 	*x = GetInvoiceRequest{}
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[4]
+	mi := &file_billing_v1_billing_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -428,7 +428,7 @@ func (x *GetInvoiceRequest) String() string {
 func (*GetInvoiceRequest) ProtoMessage() {}
 
 func (x *GetInvoiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_billing_v1_billing_proto_msgTypes[4]
+	mi := &file_billing_v1_billing_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -441,7 +441,7 @@ func (x *GetInvoiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInvoiceRequest.ProtoReflect.Descriptor instead.
 func (*GetInvoiceRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_billing_v1_billing_proto_rawDescGZIP(), []int{4}
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetInvoiceRequest) GetId() string {
@@ -451,11 +451,173 @@ func (x *GetInvoiceRequest) GetId() string {
 	return ""
 }
 
-var File_api_proto_billing_v1_billing_proto protoreflect.FileDescriptor
+// CreatePaymentReq represents a new booking fee payment request to be created.
+type CreatePaymentReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReservationId string                 `protobuf:"bytes,1,opt,name=reservation_id,json=reservationId,proto3" json:"reservation_id,omitempty"` // ID of the reservation to charge
+	DriverId      string                 `protobuf:"bytes,2,opt,name=driver_id,json=driverId,proto3" json:"driver_id,omitempty"`                // Driver's unique identifier
+	AmountIdr     int64                  `protobuf:"varint,3,opt,name=amount_idr,json=amountIdr,proto3" json:"amount_idr,omitempty"`            // Booking fee amount in IDR
+	Method        string                 `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`                                    // Payment method: "QRIS" or "CC"
+	CcToken       string                 `protobuf:"bytes,5,opt,name=cc_token,json=ccToken,proto3" json:"cc_token,omitempty"`                   // Credit card token (required if method=CC)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_api_proto_billing_v1_billing_proto_rawDesc = "" +
+func (x *CreatePaymentReq) Reset() {
+	*x = CreatePaymentReq{}
+	mi := &file_billing_v1_billing_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreatePaymentReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatePaymentReq) ProtoMessage() {}
+
+func (x *CreatePaymentReq) ProtoReflect() protoreflect.Message {
+	mi := &file_billing_v1_billing_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatePaymentReq.ProtoReflect.Descriptor instead.
+func (*CreatePaymentReq) Descriptor() ([]byte, []int) {
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreatePaymentReq) GetReservationId() string {
+	if x != nil {
+		return x.ReservationId
+	}
+	return ""
+}
+
+func (x *CreatePaymentReq) GetDriverId() string {
+	if x != nil {
+		return x.DriverId
+	}
+	return ""
+}
+
+func (x *CreatePaymentReq) GetAmountIdr() int64 {
+	if x != nil {
+		return x.AmountIdr
+	}
+	return 0
+}
+
+func (x *CreatePaymentReq) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *CreatePaymentReq) GetCcToken() string {
+	if x != nil {
+		return x.CcToken
+	}
+	return ""
+}
+
+// PaymentRequest represents the result of payment request creation.
+type PaymentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`                                   // Unique ID for this payment request
+	Method        string                 `protobuf:"bytes,2,opt,name=method,proto3" json:"method,omitempty"`                           // Payment method used
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`                           // Status: "PENDING", "SUCCESS", "FAILED"
+	QrisUrl       string                 `protobuf:"bytes,4,opt,name=qris_url,json=qrisUrl,proto3" json:"qris_url,omitempty"`          // QRIS URL (only if method=QRIS)
+	PaymentRef    string                 `protobuf:"bytes,5,opt,name=payment_ref,json=paymentRef,proto3" json:"payment_ref,omitempty"` // Provider-facing reference ID
+	ExpiresAt     int64                  `protobuf:"varint,6,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`   // Unix timestamp when payment expires
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PaymentRequest) Reset() {
+	*x = PaymentRequest{}
+	mi := &file_billing_v1_billing_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaymentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaymentRequest) ProtoMessage() {}
+
+func (x *PaymentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_billing_v1_billing_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaymentRequest.ProtoReflect.Descriptor instead.
+func (*PaymentRequest) Descriptor() ([]byte, []int) {
+	return file_billing_v1_billing_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PaymentRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *PaymentRequest) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *PaymentRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *PaymentRequest) GetQrisUrl() string {
+	if x != nil {
+		return x.QrisUrl
+	}
+	return ""
+}
+
+func (x *PaymentRequest) GetPaymentRef() string {
+	if x != nil {
+		return x.PaymentRef
+	}
+	return ""
+}
+
+func (x *PaymentRequest) GetExpiresAt() int64 {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return 0
+}
+
+var File_billing_v1_billing_proto protoreflect.FileDescriptor
+
+const file_billing_v1_billing_proto_rawDesc = "" +
 	"\n" +
-	"\"api/proto/billing/v1/billing.proto\x12\x17parkirpintar.billing.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"p\n" +
+	"\x18billing/v1/billing.proto\x12\x17parkirpintar.billing.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"p\n" +
 	"\bLineItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x125\n" +
 	"\x04kind\x18\x02 \x01(\x0e2!.parkirpintar.billing.v1.LineKindR\x04kind\x12\x1d\n" +
@@ -480,7 +642,23 @@ const file_api_proto_billing_v1_billing_proto_rawDesc = "" +
 	"\rchecked_in_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcheckedInAt\x12@\n" +
 	"\x0echecked_out_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\fcheckedOutAt\"#\n" +
 	"\x11GetInvoiceRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id*Y\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xa8\x01\n" +
+	"\x10CreatePaymentReq\x12%\n" +
+	"\x0ereservation_id\x18\x01 \x01(\tR\rreservationId\x12\x1b\n" +
+	"\tdriver_id\x18\x02 \x01(\tR\bdriverId\x12\x1d\n" +
+	"\n" +
+	"amount_idr\x18\x03 \x01(\x03R\tamountIdr\x12\x16\n" +
+	"\x06method\x18\x04 \x01(\tR\x06method\x12\x19\n" +
+	"\bcc_token\x18\x05 \x01(\tR\accToken\"\xab\x01\n" +
+	"\x0ePaymentRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
+	"\x06method\x18\x02 \x01(\tR\x06method\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x19\n" +
+	"\bqris_url\x18\x04 \x01(\tR\aqrisUrl\x12\x1f\n" +
+	"\vpayment_ref\x18\x05 \x01(\tR\n" +
+	"paymentRef\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\x06 \x01(\x03R\texpiresAt*Y\n" +
 	"\rInvoiceStatus\x12\x1e\n" +
 	"\x1aINVOICE_STATUS_UNSPECIFIED\x10\x00\x12\b\n" +
 	"\x04OPEN\x10\x01\x12\n" +
@@ -496,28 +674,29 @@ const file_api_proto_billing_v1_billing_proto_rawDesc = "" +
 	"\tOVERNIGHT\x10\x03\x12\x10\n" +
 	"\fCANCELLATION\x10\x04\x12\n" +
 	"\n" +
-	"\x06NOSHOW\x10\x052\xaa\x02\n" +
+	"\x06NOSHOW\x10\x052\x96\x03\n" +
 	"\x0eBillingService\x12\\\n" +
 	"\vOpenInvoice\x12+.parkirpintar.billing.v1.OpenInvoiceRequest\x1a .parkirpintar.billing.v1.Invoice\x12^\n" +
 	"\fCloseInvoice\x12,.parkirpintar.billing.v1.CloseInvoiceRequest\x1a .parkirpintar.billing.v1.Invoice\x12Z\n" +
 	"\n" +
-	"GetInvoice\x12*.parkirpintar.billing.v1.GetInvoiceRequest\x1a .parkirpintar.billing.v1.InvoiceBAZ?github.com/farid/billing-service/api/proto/billing/v1;billingv1b\x06proto3"
+	"GetInvoice\x12*.parkirpintar.billing.v1.GetInvoiceRequest\x1a .parkirpintar.billing.v1.Invoice\x12j\n" +
+	"\x14CreatePaymentRequest\x12).parkirpintar.billing.v1.CreatePaymentReq\x1a'.parkirpintar.billing.v1.PaymentRequestBAZ?github.com/farid/billing-service/api/proto/billing/v1;billingv1b\x06proto3"
 
 var (
-	file_api_proto_billing_v1_billing_proto_rawDescOnce sync.Once
-	file_api_proto_billing_v1_billing_proto_rawDescData []byte
+	file_billing_v1_billing_proto_rawDescOnce sync.Once
+	file_billing_v1_billing_proto_rawDescData []byte
 )
 
-func file_api_proto_billing_v1_billing_proto_rawDescGZIP() []byte {
-	file_api_proto_billing_v1_billing_proto_rawDescOnce.Do(func() {
-		file_api_proto_billing_v1_billing_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_proto_billing_v1_billing_proto_rawDesc), len(file_api_proto_billing_v1_billing_proto_rawDesc)))
+func file_billing_v1_billing_proto_rawDescGZIP() []byte {
+	file_billing_v1_billing_proto_rawDescOnce.Do(func() {
+		file_billing_v1_billing_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_billing_v1_billing_proto_rawDesc), len(file_billing_v1_billing_proto_rawDesc)))
 	})
-	return file_api_proto_billing_v1_billing_proto_rawDescData
+	return file_billing_v1_billing_proto_rawDescData
 }
 
-var file_api_proto_billing_v1_billing_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_api_proto_billing_v1_billing_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_api_proto_billing_v1_billing_proto_goTypes = []any{
+var file_billing_v1_billing_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_billing_v1_billing_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_billing_v1_billing_proto_goTypes = []any{
 	(InvoiceStatus)(0),            // 0: parkirpintar.billing.v1.InvoiceStatus
 	(LineKind)(0),                 // 1: parkirpintar.billing.v1.LineKind
 	(*LineItem)(nil),              // 2: parkirpintar.billing.v1.LineItem
@@ -525,51 +704,55 @@ var file_api_proto_billing_v1_billing_proto_goTypes = []any{
 	(*OpenInvoiceRequest)(nil),    // 4: parkirpintar.billing.v1.OpenInvoiceRequest
 	(*CloseInvoiceRequest)(nil),   // 5: parkirpintar.billing.v1.CloseInvoiceRequest
 	(*GetInvoiceRequest)(nil),     // 6: parkirpintar.billing.v1.GetInvoiceRequest
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
+	(*CreatePaymentReq)(nil),      // 7: parkirpintar.billing.v1.CreatePaymentReq
+	(*PaymentRequest)(nil),        // 8: parkirpintar.billing.v1.PaymentRequest
+	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
 }
-var file_api_proto_billing_v1_billing_proto_depIdxs = []int32{
+var file_billing_v1_billing_proto_depIdxs = []int32{
 	1,  // 0: parkirpintar.billing.v1.LineItem.kind:type_name -> parkirpintar.billing.v1.LineKind
 	0,  // 1: parkirpintar.billing.v1.Invoice.status:type_name -> parkirpintar.billing.v1.InvoiceStatus
 	2,  // 2: parkirpintar.billing.v1.Invoice.lines:type_name -> parkirpintar.billing.v1.LineItem
-	7,  // 3: parkirpintar.billing.v1.Invoice.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 4: parkirpintar.billing.v1.Invoice.closed_at:type_name -> google.protobuf.Timestamp
-	7,  // 5: parkirpintar.billing.v1.Invoice.paid_at:type_name -> google.protobuf.Timestamp
-	7,  // 6: parkirpintar.billing.v1.CloseInvoiceRequest.checked_in_at:type_name -> google.protobuf.Timestamp
-	7,  // 7: parkirpintar.billing.v1.CloseInvoiceRequest.checked_out_at:type_name -> google.protobuf.Timestamp
+	9,  // 3: parkirpintar.billing.v1.Invoice.created_at:type_name -> google.protobuf.Timestamp
+	9,  // 4: parkirpintar.billing.v1.Invoice.closed_at:type_name -> google.protobuf.Timestamp
+	9,  // 5: parkirpintar.billing.v1.Invoice.paid_at:type_name -> google.protobuf.Timestamp
+	9,  // 6: parkirpintar.billing.v1.CloseInvoiceRequest.checked_in_at:type_name -> google.protobuf.Timestamp
+	9,  // 7: parkirpintar.billing.v1.CloseInvoiceRequest.checked_out_at:type_name -> google.protobuf.Timestamp
 	4,  // 8: parkirpintar.billing.v1.BillingService.OpenInvoice:input_type -> parkirpintar.billing.v1.OpenInvoiceRequest
 	5,  // 9: parkirpintar.billing.v1.BillingService.CloseInvoice:input_type -> parkirpintar.billing.v1.CloseInvoiceRequest
 	6,  // 10: parkirpintar.billing.v1.BillingService.GetInvoice:input_type -> parkirpintar.billing.v1.GetInvoiceRequest
-	3,  // 11: parkirpintar.billing.v1.BillingService.OpenInvoice:output_type -> parkirpintar.billing.v1.Invoice
-	3,  // 12: parkirpintar.billing.v1.BillingService.CloseInvoice:output_type -> parkirpintar.billing.v1.Invoice
-	3,  // 13: parkirpintar.billing.v1.BillingService.GetInvoice:output_type -> parkirpintar.billing.v1.Invoice
-	11, // [11:14] is the sub-list for method output_type
-	8,  // [8:11] is the sub-list for method input_type
+	7,  // 11: parkirpintar.billing.v1.BillingService.CreatePaymentRequest:input_type -> parkirpintar.billing.v1.CreatePaymentReq
+	3,  // 12: parkirpintar.billing.v1.BillingService.OpenInvoice:output_type -> parkirpintar.billing.v1.Invoice
+	3,  // 13: parkirpintar.billing.v1.BillingService.CloseInvoice:output_type -> parkirpintar.billing.v1.Invoice
+	3,  // 14: parkirpintar.billing.v1.BillingService.GetInvoice:output_type -> parkirpintar.billing.v1.Invoice
+	8,  // 15: parkirpintar.billing.v1.BillingService.CreatePaymentRequest:output_type -> parkirpintar.billing.v1.PaymentRequest
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
 }
 
-func init() { file_api_proto_billing_v1_billing_proto_init() }
-func file_api_proto_billing_v1_billing_proto_init() {
-	if File_api_proto_billing_v1_billing_proto != nil {
+func init() { file_billing_v1_billing_proto_init() }
+func file_billing_v1_billing_proto_init() {
+	if File_billing_v1_billing_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_billing_v1_billing_proto_rawDesc), len(file_api_proto_billing_v1_billing_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_billing_v1_billing_proto_rawDesc), len(file_billing_v1_billing_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_api_proto_billing_v1_billing_proto_goTypes,
-		DependencyIndexes: file_api_proto_billing_v1_billing_proto_depIdxs,
-		EnumInfos:         file_api_proto_billing_v1_billing_proto_enumTypes,
-		MessageInfos:      file_api_proto_billing_v1_billing_proto_msgTypes,
+		GoTypes:           file_billing_v1_billing_proto_goTypes,
+		DependencyIndexes: file_billing_v1_billing_proto_depIdxs,
+		EnumInfos:         file_billing_v1_billing_proto_enumTypes,
+		MessageInfos:      file_billing_v1_billing_proto_msgTypes,
 	}.Build()
-	File_api_proto_billing_v1_billing_proto = out.File
-	file_api_proto_billing_v1_billing_proto_goTypes = nil
-	file_api_proto_billing_v1_billing_proto_depIdxs = nil
+	File_billing_v1_billing_proto = out.File
+	file_billing_v1_billing_proto_goTypes = nil
+	file_billing_v1_billing_proto_depIdxs = nil
 }

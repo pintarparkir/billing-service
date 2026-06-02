@@ -67,15 +67,14 @@ func (r *paymentRequestRepo) Create(ctx context.Context, req *model.PaymentReque
 	return req, nil
 }
 
-const getPaymentRequestByIDSQL = `
-SELECT id, reservation_id, invoice_id, amount_idr, method, status, payment_ref, qris_url, expires_at, created_at, updated_at
-FROM payment_requests
-WHERE id = $1
-`
+// paymentRequestColumns is the shared column list for payment_requests queries.
+const paymentRequestColumns = `id, reservation_id, invoice_id, amount_idr, method, status, payment_ref, qris_url, expires_at, created_at, updated_at`
 
-func (r *paymentRequestRepo) GetByID(ctx context.Context, id string) (*model.PaymentRequest, error) {
+// scanPaymentRequest executes a single-row query and maps to model, returning
+// ErrNotFound on sql.ErrNoRows. This eliminates repeated scan boilerplate.
+func (r *paymentRequestRepo) scanPaymentRequest(ctx context.Context, query string, args ...interface{}) (*model.PaymentRequest, error) {
 	var row paymentRequestRow
-	err := r.db.QueryRowxContext(ctx, getPaymentRequestByIDSQL, id).StructScan(&row)
+	err := r.db.QueryRowxContext(ctx, query, args...).StructScan(&row)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, apperror.ErrNotFound
 	}
@@ -85,24 +84,19 @@ func (r *paymentRequestRepo) GetByID(ctx context.Context, id string) (*model.Pay
 	return row.toModel(), nil
 }
 
-const getPaymentRequestByReservationSQL = `
-SELECT id, reservation_id, invoice_id, amount_idr, method, status, payment_ref, qris_url, expires_at, created_at, updated_at
-FROM payment_requests
-WHERE reservation_id = $1
-ORDER BY created_at DESC
-LIMIT 1
-`
+func (r *paymentRequestRepo) GetByID(ctx context.Context, id string) (*model.PaymentRequest, error) {
+	return r.scanPaymentRequest(ctx,
+		`SELECT `+paymentRequestColumns+` FROM payment_requests WHERE id = $1`, id)
+}
 
 func (r *paymentRequestRepo) GetByReservationID(ctx context.Context, reservationID string) (*model.PaymentRequest, error) {
-	var row paymentRequestRow
-	err := r.db.QueryRowxContext(ctx, getPaymentRequestByReservationSQL, reservationID).StructScan(&row)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, apperror.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return row.toModel(), nil
+	return r.scanPaymentRequest(ctx,
+		`SELECT `+paymentRequestColumns+` FROM payment_requests WHERE reservation_id = $1 ORDER BY created_at DESC LIMIT 1`, reservationID)
+}
+
+func (r *paymentRequestRepo) GetByPaymentRef(ctx context.Context, paymentRef string) (*model.PaymentRequest, error) {
+	return r.scanPaymentRequest(ctx,
+		`SELECT `+paymentRequestColumns+` FROM payment_requests WHERE payment_ref = $1`, paymentRef)
 }
 
 const updatePaymentRequestStatusSQL = `
@@ -114,24 +108,6 @@ WHERE id = $1
 func (r *paymentRequestRepo) UpdateStatus(ctx context.Context, id string, status model.PaymentRequestStatus) error {
 	_, err := r.db.ExecContext(ctx, updatePaymentRequestStatusSQL, id, string(status))
 	return err
-}
-
-const getPaymentRequestByRefSQL = `
-SELECT id, reservation_id, invoice_id, amount_idr, method, status, payment_ref, qris_url, expires_at, created_at, updated_at
-FROM payment_requests
-WHERE payment_ref = $1
-`
-
-func (r *paymentRequestRepo) GetByPaymentRef(ctx context.Context, paymentRef string) (*model.PaymentRequest, error) {
-	var row paymentRequestRow
-	err := r.db.QueryRowxContext(ctx, getPaymentRequestByRefSQL, paymentRef).StructScan(&row)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, apperror.ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return row.toModel(), nil
 }
 
 const updateStatusByRefSQL = `

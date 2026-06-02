@@ -5,6 +5,7 @@ package configs
 type Config struct {
 	AppName  string `env:"APP_NAME" envDefault:"billing-service"`
 	AppEnv   string `env:"APP_ENV" envDefault:"local"`
+	AppPort  string `env:"APP_PORT" envDefault:"8080"`  // HTTP port (Cloud Run exposes this)
 	GrpcPort string `env:"GRPC_PORT" envDefault:"9091"` // gRPC port (s2s) — billing has no REST surface
 
 	DbHost     string `env:"DB_HOST" envDefault:"localhost"`

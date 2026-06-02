@@ -128,15 +128,19 @@ func main() {
 	// ── HTTP server (payment gateway webhooks) ───────────────────────────────
 	webhookHandler := billhttp.NewWebhookHandler(uc, "") // TODO: add config for Midtrans signing key
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status":"ok"}`))
+	})
 	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
 	httpServer := &http.Server{
-		Addr:         fmt.Sprintf(":%d", 8084),
+		Addr:         ":" + cfg.AppPort,
 		Handler:      mux,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}
 	go func() {
-		logger.Info(ctx, "HTTP server starting", map[string]interface{}{"port": 8084})
+		logger.Info(ctx, "HTTP server starting", map[string]interface{}{"port": cfg.AppPort})
 		if err := httpServer.ListenAndServe(); err != nil && err.Error() != "http: Server closed" {
 			logger.Error(ctx, "http serve failed", map[string]interface{}{logger.ErrorKey: err.Error()})
 		}

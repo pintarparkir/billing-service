@@ -2,6 +2,7 @@ package grpcclient_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -21,7 +22,12 @@ func TestCreateQrisIntent_Success(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, result)
-	assert.Contains(t, err.Error(), "connection")
+	// gRPC may return "connection refused", "connection error", or
+	// "produced zero addresses" depending on DNS resolution behaviour.
+	errMsg := err.Error()
+	assert.True(t,
+		strings.Contains(errMsg, "connection") || strings.Contains(errMsg, "produced zero addresses"),
+		"unexpected error: %s", errMsg)
 }
 
 func TestGetPayment_Success(t *testing.T) {
@@ -40,11 +46,11 @@ func TestPaymentIntentResponse_SnapToken(t *testing.T) {
 	t.Parallel()
 
 	expected := &grpcclient.QrisIntentResult{
-		PaymentID:     "pay-123",
-		SnapToken:     "SNAP-TOKEN-xyz",
-		RedirectURL:   "https://app.midtrans.com/snap/v1/transactions/pay-123/pay",
-		PgReference:   "txn-abc",
-		ExpiresAt:     time.Date(2026, 12, 31, 23, 59, 59, 0, time.UTC),
+		PaymentID:   "pay-123",
+		SnapToken:   "SNAP-TOKEN-xyz",
+		RedirectURL: "https://app.midtrans.com/snap/v1/transactions/pay-123/pay",
+		PgReference: "txn-abc",
+		ExpiresAt:   time.Date(2026, 12, 31, 23, 59, 59, 0, time.UTC),
 	}
 
 	assert.NotEmpty(t, expected.PaymentID)

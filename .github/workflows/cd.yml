@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 env:
-  GO_VERSION: '1.25.10'
   GCP_PROJECT_ID: pintarparkir
   GCP_REGION: asia-southeast1
   AR_REGION: asia-southeast2
@@ -82,15 +81,15 @@ jobs:
           region: ${{ env.GCP_REGION }}
           env_vars: |
             PROJECT_ENV=production
+            APP_PORT=8080
             APP_NAME=billing-service
             APP_ENV=production
-            APP_PORT=8080
-            GRPC_PORT=9091
             DB_HOST=/cloudsql/pintarparkir:asia-southeast1:parkirpintar-db-dev
             DB_PORT=5432
             DB_USERNAME=parking_pool_user
             DB_NAME=parkirpintar
             RABBIT_EXCHANGE=parkirpintar.events
+            RABBIT_QUEUE=billing-service
             BOOKING_FEE_IDR=5000
             HOURLY_RATE_IDR=5000
             OVERNIGHT_FLAT_IDR=20000
@@ -102,13 +101,13 @@ jobs:
             RABBIT_URL=rabbit-url:latest
           flags: >-
             --port=8080
-            --use-http2
             --allow-unauthenticated
             --min-instances=1
             --max-instances=3
             --memory=512Mi
             --cpu=1
             --timeout=300
+            --use-http2
             --add-cloudsql-instances=pintarparkir:asia-southeast1:parkirpintar-db-dev
             --vpc-connector=projects/pintarparkir/locations/asia-southeast1/connectors/parkirpintar-connector
 
@@ -125,5 +124,5 @@ jobs:
             echo "attempt $i failed; retrying in 10s"
             sleep 10
           done
-          echo "::warning::smoke probe failed – service may still be starting"
+          echo "::warning::smoke probe failed - service may still be starting"
           exit 0

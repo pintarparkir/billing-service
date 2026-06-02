@@ -26,8 +26,6 @@ import (
 	"syscall"
 	"time"
 
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 
 	"github.com/farid/billing-service/internal/billing/consumer"
@@ -127,9 +125,13 @@ func main() {
 	})
 	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
 
+	var protos http.Protocols
+	protos.SetHTTP1(true)
+	protos.SetUnencryptedHTTP2(true)
 	httpServer := &http.Server{
 		Addr:         ":" + cfg.AppPort,
-		Handler:      h2c.NewHandler(grpcHTTPMux(grpcSrv.Server, mux), &http2.Server{}),
+		Handler:      grpcHTTPMux(grpcSrv.Server, mux),
+		Protocols:    &protos,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}

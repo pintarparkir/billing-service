@@ -20,11 +20,11 @@ type PaymentClient interface {
 
 // QrisIntentResult represents the response from CreateQrisIntent.
 type QrisIntentResult struct {
-	PaymentID     string
-	SnapToken     string
-	RedirectURL   string
-	PgReference   string
-	ExpiresAt     time.Time
+	PaymentID   string
+	SnapToken   string
+	RedirectURL string
+	PgReference string
+	ExpiresAt   time.Time
 }
 
 // PaymentResult represents the response from GetPayment.
@@ -77,11 +77,11 @@ func (c *paymentClient) CreateQrisIntent(ctx context.Context, invoiceID string, 
 	}
 
 	return &QrisIntentResult{
-		PaymentID:     resp.PaymentId,
-		SnapToken:     resp.SnapToken,
-		RedirectURL:   resp.RedirectUrl,
-		PgReference:   resp.PgReference,
-		ExpiresAt:     expiresAt,
+		PaymentID:   resp.PaymentId,
+		SnapToken:   resp.SnapToken,
+		RedirectURL: resp.RedirectUrl,
+		PgReference: resp.PgReference,
+		ExpiresAt:   expiresAt,
 	}, nil
 }
 

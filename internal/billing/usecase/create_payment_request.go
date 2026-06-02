@@ -19,12 +19,12 @@ type CreatePaymentRequestInput struct {
 }
 
 type CreatePaymentRequestOutput struct {
-	ID        string
-	Method    string
-	Status    string
-	QRISURL   string
+	ID         string
+	Method     string
+	Status     string
+	QRISURL    string
 	PaymentRef string
-	ExpiresAt int64
+	ExpiresAt  int64
 }
 
 // CreatePaymentRequest creates a payment request for a reservation.

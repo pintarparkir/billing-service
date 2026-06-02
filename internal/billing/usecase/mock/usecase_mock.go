@@ -11,8 +11,8 @@ import (
 
 	"github.com/farid/billing-service/internal/billing/model"
 	"github.com/farid/billing-service/internal/billing/repository"
-	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/internal/billing/usecase"
+	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/pkg/pricing"
 )
 

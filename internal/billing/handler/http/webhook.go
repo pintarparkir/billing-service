@@ -15,7 +15,7 @@ import (
 // WebhookHandler handles payment gateway webhook notifications.
 // Currently supports Midtrans-like callback payloads.
 type WebhookHandler struct {
-	uc     usecase.BillingUsecase
+	uc      usecase.BillingUsecase
 	signKey string
 }
 
@@ -29,13 +29,14 @@ func NewWebhookHandler(uc usecase.BillingUsecase, signKey string) *WebhookHandle
 
 // Handle processes payment gateway callbacks.
 // Expected payload format (Midtrans-like):
-// {
-//   "order_id": "PAY-ref-xxx",
-//   "transaction_status": "settlement|capture|cancel|deny|expire|pending",
-//   "fraud_status": "accept|challenge|deny",
-//   "gross_amount": "5000",
-//   "signature_key": "abc123..."
-// }
+//
+//	{
+//	  "order_id": "PAY-ref-xxx",
+//	  "transaction_status": "settlement|capture|cancel|deny|expire|pending",
+//	  "fraud_status": "accept|challenge|deny",
+//	  "gross_amount": "5000",
+//	  "signature_key": "abc123..."
+//	}
 func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

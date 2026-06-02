@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/farid/billing-service/internal/billing/model"
-	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/internal/billing/repository"
 	mockrepo "github.com/farid/billing-service/internal/billing/repository/mock"
 	"github.com/farid/billing-service/internal/billing/usecase"
 	apperror "github.com/farid/billing-service/pkg/error"
+	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/pkg/pricing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

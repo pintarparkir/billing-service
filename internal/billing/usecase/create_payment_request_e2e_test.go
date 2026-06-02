@@ -12,9 +12,9 @@ import (
 	"github.com/farid/billing-service/internal/billing/model"
 	"github.com/farid/billing-service/internal/billing/repository"
 	mockrepo "github.com/farid/billing-service/internal/billing/repository/mock"
-	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/internal/billing/usecase"
 	apperror "github.com/farid/billing-service/pkg/error"
+	grpcclient "github.com/farid/billing-service/pkg/grpcclient"
 	"github.com/farid/billing-service/pkg/pricing"
 )
 

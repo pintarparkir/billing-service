@@ -41,13 +41,13 @@ func (m *e2eMockPaymentClient) GetPayment(ctx context.Context, paymentID string)
 
 // E2ETestSuite provides comprehensive E2E test scenarios for complete payment flow
 type E2ETestSuite struct {
-	ctx                context.Context
-	repo               *mockrepo.MockInvoiceRepository
-	paymentRepo        *mockPaymentRequestRepository
-	paymentClient      *e2eMockPaymentClient
-	uc                 usecase.BillingUsecase
-	invoice            *model.Invoice
-	snapRedirectURL    string
+	ctx             context.Context
+	repo            *mockrepo.MockInvoiceRepository
+	paymentRepo     *mockPaymentRequestRepository
+	paymentClient   *e2eMockPaymentClient
+	uc              usecase.BillingUsecase
+	invoice         *model.Invoice
+	snapRedirectURL string
 }
 
 func NewE2ETestSuite() *E2ETestSuite {
@@ -206,7 +206,7 @@ func (s *E2ETestSuite) TestE2E_MultiplePaymentRetries(t *testing.T) {
 
 	// Second retry - different SNAP URL (new transaction)
 	secondSnapURL := "https://app.midtrans.com/snap/v1/transactions/retry-2/pay"
-	s.paymentClient.On("CreateQrisIntent", s.ctx, "inv-e2e-retry", int64(5000")).Once().
+	s.paymentClient.On("CreateQrisIntent", s.ctx, "inv-e2e-retry", int64(5000)).Once().
 		Return(&grpcclient.QrisIntentResult{RedirectURL: secondSnapURL}, nil)
 
 	result2, err := s.uc.CreatePaymentRequest(s.ctx, usecase.CreatePaymentRequestInput{

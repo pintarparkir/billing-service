@@ -22,8 +22,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
+
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+	"google.golang.org/grpc"
 
 	"github.com/farid/billing-service/internal/billing/consumer"
 	billgrpc "github.com/farid/billing-service/internal/billing/handler/grpc"
@@ -107,25 +112,13 @@ func main() {
 	uc := billuc.NewBillingUsecase(repo, engine, pricingCfg).WithPaymentRequestRepository(paymentRepo)
 
 	// ── gRPC server (s2s callers — reservation-service.CreatePaymentRequest) ─
-	// CloseInvoice is naturally idempotent at the row level (status != OPEN
-	// short-circuits) and reservation-service doesn't have a stable client key
-	// to pass on the close path, so we don't enforce header-level idempotency
-	// here. OpenInvoice still requires Idempotency-Key from the caller.
-	grpcSrv, err := grpcserver.NewGrpcServer(cfg.GrpcPort, grpcserver.Options{
+	grpcSrv, _ := grpcserver.NewGrpcServerNoListen(grpcserver.Options{
 		IdempotencyStore:  idempotency.NewPostgresStore(db),
 		IdempotentMethods: []string{model.ScopeOpenInvoice},
 	})
-	if err != nil {
-		logger.Fatal(ctx, "grpc server init failed", map[string]interface{}{logger.ErrorKey: err.Error()})
-	}
 	billgrpc.Register(grpcSrv.Server, uc)
-	go func() {
-		if err := grpcSrv.Start(); err != nil {
-			logger.Fatal(ctx, "grpc serve failed", map[string]interface{}{logger.ErrorKey: err.Error()})
-		}
-	}()
 
-	// ── HTTP server (payment gateway webhooks) ───────────────────────────────
+	// ── HTTP server (multiplexed gRPC+REST on same port via h2c) ─────────────
 	webhookHandler := billhttp.NewWebhookHandler(uc, "") // TODO: add config for Midtrans signing key
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
@@ -133,16 +126,17 @@ func main() {
 		_, _ = w.Write([]byte(`{"status":"ok"}`))
 	})
 	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
+
 	httpServer := &http.Server{
 		Addr:         ":" + cfg.AppPort,
-		Handler:      mux,
+		Handler:      h2c.NewHandler(grpcHTTPMux(grpcSrv.Server, mux), &http2.Server{}),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}
 	go func() {
-		logger.Info(ctx, "HTTP server starting", map[string]interface{}{"port": cfg.AppPort})
+		logger.Info(ctx, "billing-service listening (gRPC+HTTP)", map[string]interface{}{"port": cfg.AppPort})
 		if err := httpServer.ListenAndServe(); err != nil && err.Error() != "http: Server closed" {
-			logger.Error(ctx, "http serve failed", map[string]interface{}{logger.ErrorKey: err.Error()})
+			logger.Error(ctx, "listen failed", map[string]interface{}{logger.ErrorKey: err.Error()})
 		}
 	}()
 
@@ -164,11 +158,22 @@ func main() {
 	// ── Graceful shutdown ────────────────────────────────────────────────────
 	<-ctx.Done()
 	logger.Info(context.Background(), "shutdown signal received", nil)
-	grpcSrv.Shutdown()
+	grpcSrv.Server.GracefulStop()
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	_ = httpServer.Shutdown(shutdownCtx)
 	if err := logger.Sync(); err != nil {
 		fmt.Fprintln(os.Stderr, "logger sync:", err)
 	}
+}
+
+// grpcHTTPMux routes gRPC to grpcServer, everything else to httpHandler.
+func grpcHTTPMux(grpcSrv *grpc.Server, httpHandler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
+			grpcSrv.ServeHTTP(w, r)
+			return
+		}
+		httpHandler.ServeHTTP(w, r)
+	})
 }

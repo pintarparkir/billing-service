@@ -127,6 +127,7 @@ func main() {
 		}
 	})
 	mux.HandleFunc("/v1/invoices", invoiceHandler.GetByReservation)
+	mux.HandleFunc("/v1/invoices/", invoiceHandler.GetByReservation)
 	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
 
 	var protos http.Protocols

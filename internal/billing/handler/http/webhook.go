@@ -71,11 +71,11 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 func readBody(r *http.Request) ([]byte, error) {
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 	buf := make([]byte, 4096) // Max 4KB webhook payload
 	n, err := r.Body.Read(buf)
 	if err != nil && err.Error() != "EOF" {

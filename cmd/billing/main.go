@@ -128,9 +128,9 @@ func main() {
 	// ── HTTP server (payment gateway webhooks) ───────────────────────────────
 	webhookHandler := billhttp.NewWebhookHandler(uc, "") // TODO: add config for Midtrans signing key
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"status":"ok"}`))
+		_, _ = w.Write([]byte(`{"status":"ok"}`))
 	})
 	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
 	httpServer := &http.Server{

@@ -1,10 +1,10 @@
 # billing-service
 
-[![Security](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=security_rating&token=66ea93348f4a130c2f9af61ca6938a8d5b9b4f9a)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
-[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=reliability_rating&token=66ea93348f4a130c2f9af61ca6938a8d5b9b4f9a)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
-[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=sqale_rating&token=66ea93348f4a130c2f9af61ca6938a8d5b9b4f9a)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
-[![Duplications](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=duplicated_lines_density&token=66ea93348f4a130c2f9af61ca6938a8d5b9b4f9a)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=coverage&token=66ea93348f4a130c2f9af61ca6938a8d5b9b4f9a)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
+[![Security](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=security_rating&token=627302b199b2f792bd1ba8dc5a91777d38398d2c)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
+[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=reliability_rating&token=627302b199b2f792bd1ba8dc5a91777d38398d2c)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=sqale_rating&token=627302b199b2f792bd1ba8dc5a91777d38398d2c)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
+[![Duplications](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=duplicated_lines_density&token=627302b199b2f792bd1ba8dc5a91777d38398d2c)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=pintarparkir_billing-service&metric=coverage&token=627302b199b2f792bd1ba8dc5a91777d38398d2c)](https://sonarcloud.io/summary/new_code?id=pintarparkir_billing-service)
 
 **Cloud Run:** `https://billing-service-725nddkmwq-as.a.run.app`
 

@@ -118,6 +118,7 @@ func main() {
 
 	// ── HTTP server (multiplexed gRPC+REST on same port via h2c) ─────────────
 	webhookHandler := billhttp.NewWebhookHandler(uc, "") // TODO: add config for Midtrans signing key
+	invoiceHandler := billhttp.NewInvoiceHandler(uc)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -125,6 +126,7 @@ func main() {
 			logger.Error(context.Background(), "health write failed", map[string]interface{}{logger.ErrorKey: err.Error()})
 		}
 	})
+	mux.HandleFunc("/v1/invoices", invoiceHandler.GetByReservation)
 	mux.HandleFunc("/webhook/payment", webhookHandler.Handle)
 
 	var protos http.Protocols

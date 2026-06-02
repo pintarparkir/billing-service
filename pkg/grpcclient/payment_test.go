@@ -26,7 +26,7 @@ func TestCreateQrisIntent_Success(t *testing.T) {
 	// "produced zero addresses" depending on DNS resolution behaviour.
 	errMsg := err.Error()
 	assert.True(t,
-		strings.Contains(errMsg, "connection") || strings.Contains(errMsg, "produced zero addresses"),
+		strings.Contains(errMsg, "connection") || strings.Contains(errMsg, "produced zero addresses") || strings.Contains(errMsg, "dns"),
 		"unexpected error: %s", errMsg)
 }
 
@@ -56,6 +56,7 @@ func TestPaymentIntentResponse_SnapToken(t *testing.T) {
 	assert.NotEmpty(t, expected.PaymentID)
 	assert.NotEmpty(t, expected.SnapToken)
 	assert.NotEmpty(t, expected.RedirectURL)
+	assert.NotEmpty(t, expected.PgReference)
 	assert.False(t, expected.ExpiresAt.IsZero())
 }
 

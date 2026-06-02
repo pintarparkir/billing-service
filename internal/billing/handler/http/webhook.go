@@ -55,7 +55,7 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal(body, &webhookMap); err == nil {
 		if sigKey, ok := webhookMap["signature_key"].(string); ok && sigKey != "" {
 			if !verifySignature(sigKey, h.signKey, body) {
-				logger.Error(r.Context(), "webhook: invalid signature", map[string]interface{}{"order_id": getOrderId(webhookMap)})
+				logger.Error(r.Context(), "webhook: invalid signature", map[string]interface{}{"order_id": getOrderID(webhookMap)})
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -91,7 +91,7 @@ func verifySignature(sig, key string, body []byte) bool {
 	return hmac.Equal([]byte(sig), []byte(expected))
 }
 
-func getOrderId(data map[string]interface{}) string {
+func getOrderID(data map[string]interface{}) string {
 	if orderID, ok := data["order_id"].(string); ok {
 		return orderID
 	}
